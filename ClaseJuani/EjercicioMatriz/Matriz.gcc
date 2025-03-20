@@ -1,0 +1,114 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Función para leer una matriz desde un archivo
+int leerMatriz(FILE *archivo, float **matriz, int filas, int columnas) {
+    // Verificar si el archivo está abierto correctamente
+    if (!archivo) {
+        fprintf(stderr, "Error al abrir el archivo\n");
+        return 0;
+    }
+
+    // Leer cada elemento de la matriz
+    for(int i = 0; i < filas; i++) {
+        for(int j = 0; j < columnas; j++) {
+            if(fscanf(archivo, "%f", &matriz[i][j]) != 1) {
+                fprintf(stderr, "Error leyendo elemento [%d][%d]\n", i, j);
+                return 0;
+            }
+        }
+    }
+    
+    return 1;
+}
+
+// Función para escribir una matriz en un archivo
+int escribirMatriz(FILE *archivo, float **matriz, int filas, int columnas) {
+    // Verificar si el archivo está abierto correctamente
+    if (!archivo) {
+        fprintf(stderr, "Error al abrir el archivo\n");
+        return 0;
+    }
+
+    // Escribir cada elemento de la matriz
+    for(int i = 0; i < filas; i++) {
+        for(int j = 0; j < columnas; j++) {
+            fprintf(archivo, "%.2f", matriz[i][j]);
+            // Agregar espacio después de cada número excepto el último de la fila
+            if(j < columnas - 1) {
+                fprintf(archivo, " ");
+            }
+        }
+        fprintf(archivo, "\n");
+    }
+    
+    return 1;
+}
+
+int main() {
+    int filas = 3;
+    int columnas = 3;
+    float **matriz;
+
+    // Reservar memoria para la matriz
+    matriz = (float **)malloc(filas * sizeof(float *));
+    if (!matriz) {
+        fprintf(stderr, "Error al reservar memoria\n");
+        return 1;
+    }
+
+    for(int i = 0; i < filas; i++) {
+        matriz[i] = (float *)malloc(columnas * sizeof(float));
+        if (!matriz[i]) {
+            fprintf(stderr, "Error al reservar memoria\n");
+            return 1;
+        }
+    }
+
+    // Abrir archivo para lectura
+    FILE *archivo_entrada = fopen("matriz.txt", "r");
+    if (!archivo_entrada) {
+        fprintf(stderr, "Error al abrir archivo de entrada\n");
+        return 1;
+    }
+
+    // Leer la matriz del archivo
+    if(!leerMatriz(archivo_entrada, matriz, filas, columnas)) {
+        fclose(archivo_entrada);
+        return 1;
+    }
+
+    fclose(archivo_entrada);
+
+    // Mostrar la matriz leída
+    printf("Matriz leída:\n");
+    for(int i = 0; i < filas; i++) {
+        for(int j = 0; j < columnas; j++) {
+            printf("%.2f ", matriz[i][j]);
+        }
+        printf("\n");
+    }
+
+    // Abrir archivo para escritura
+    FILE *archivo_salida = fopen("matriz_copia.txt", "w");
+    if (!archivo_salida) {
+        fprintf(stderr, "Error al abrir archivo de salida\n");
+        return 1;
+    }
+
+    // Escribir la matriz en el nuevo archivo
+    if(!escribirMatriz(archivo_salida, matriz, filas, columnas)) {
+        fclose(archivo_salida);
+        return 1;
+    }
+
+    fclose(archivo_salida);
+
+    // Liberar memoria
+    for(int i = 0; i < filas; i++) {
+        free(matriz[i]);
+    }
+    free(matriz);
+
+    return 0;
+}
