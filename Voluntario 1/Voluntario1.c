@@ -111,11 +111,12 @@ void aceleracion(double r[N][2], double a[N][2])
                 double r = pow(dr[i][j][0]*dr[i][j][0] + dr[i][j][1]*dr[i][j][1], 0.5); //Distancia al cuadrado
                 double acc = 4*Epsilon*(12*pow(Sigma,12)/pow(r,13)-6*pow(Sigma,6)/pow(r,7))/(M*r); //Aceleración
 
-                //Para evitar muchos cálculos, lo guardamos en un vector auxiliar.
+                //Para evitar muchos cálculos, lo guardo en un vector auxiliar.
                 a[i][0] += acc*dr[i][j][0]; //Aceleración en x
                 a[i][1] += acc*dr[i][j][1]; //Aceleración en y
 
             }
     }
+}
 }
 
