@@ -19,7 +19,7 @@
 #define L 10.0              //Longitud de la caja LXL
 #define T 1.0               //Temperatura
 #define M 1.0               //Masa de las partículas
-#define h 0.2              //Paso temporal
+#define h 0.01              //Paso temporal
 #define PI 3.14159265       //Pi
 #define T_TOTAL 10.0        //Tiempo total de simulación
 
@@ -76,6 +76,7 @@ void distancia(double r[N][2], double dr[N][N][2])
             {
                 double a=r[i][0]-r[j][0]; //Diferencia en x
                 double b=r[i][1]-r[j][1]; //Diferencia en y
+
                 if (a> L/2)
                 dr[i][j][0] = a - L; 
                 else if (a < -L/2)
@@ -99,8 +100,15 @@ void distancia(double r[N][2], double dr[N][N][2])
 //Ahora implemento la aceleración. F=m*a.
 
 
-void aceleracion(double r[N][2], double a[N][2])
+void aceleracion(double dr[N][N][2], double a[N][2])
 {
+
+    //Inicializo la aceleración a 0.
+    for (int i=0; i<N; i++)
+    {
+        a[i][0] = 0.0; //Aceleración en x
+        a[i][1] = 0.0; //Aceleración en y
+    }
 
     for (int i=0; i<N; i++)
     {
@@ -127,7 +135,7 @@ void aceleracion(double r[N][2], double a[N][2])
 
 //Ahora hago el algoritmo de Verlet.
 
-void verlet(double r[N][2], double v[N][2], double a[N][2], FILE *file)
+void verlet(double r[N][2], double v[N][2], double a[N][2], double dr[N][N][2], FILE *file)
 {
     double omega[N][2]; //Vector auxiliar para la velocidad
 
@@ -143,8 +151,11 @@ void verlet(double r[N][2], double v[N][2], double a[N][2], FILE *file)
     //Actualizo la periodicidad de las posiciones
     periodicidad(r);
 
+    //Actualizo la distancia entre partículas (t+h)
+    distancia(r, dr);
+
     //Actualizo las aceleraciones (t+h)
-    aceleracion(r,a);
+    aceleracion(dr,a);
 
     //Actualizo las velocidades (t+h)
     for (int i=0; i<N; i++)
@@ -208,7 +219,12 @@ int main(void)
         
         
     }
-    aceleracion(r,a); //Calculo la aceleración inicial.
+    //Inicializo la distancia entre partículas y la aceleración.
+    distancia(r, dr); 
+
+    aceleracion(dr,a);
+
+
     for(int i=0; i<N; i++)
     {
         //Imprimo las posiciones y velocidades iniciales.
@@ -217,18 +233,11 @@ int main(void)
     fprintf(salida, "\n"); //Salto de línea para separar los pasos
 
 
-
     //Ahora hago el bucle de la simulación. El tiempo total es T_TOTAL y el paso temporal es h.
     for (double t=0; t<T_TOTAL; t+=h)
     {
-        //Calculo la distancia entre partículas.
-        distancia(r, dr);
-
-        //Calculo la aceleración de cada partícula.
-        aceleracion(r, a);
-
-        //Hago el algoritmo de Verlet.
-        verlet(r, v, a, salida);
+        
+        verlet(r, v, a, dr, salida);
     }
 
     fclose(salida); //Cierro el fichero de salida
