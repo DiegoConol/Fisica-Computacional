@@ -26,6 +26,9 @@
 
 
 
+
+
+
 //Primero a qué posición y velocidad inicial tienen las partículas:
 //N es las particulas, 2 es para las coordenadas x e y.
 
@@ -230,6 +233,45 @@ void energia(double dr[N][N][2], double v[N][2], FILE *file)
 
 //Ahora hago la función de guardar las velocidades.
 
+/* ################### VOY A USAR MEMORIA DINÁMICA PARA GUARDAR LAS VELOCIDADES Y POSICIONES EN CADA PASO ###################
+
+
+Es una función muy grande.
+Crea memoria para un array tridimensional de tamaño N x 2 x numpasos.
+El primer índice es el número de partículas, el segundo índice es 2 (x e y) y el tercer índice es el número de pasos temporales.
+*/
+
+//Ahora hago la función de guardar las velocidades y posiciones con memoria dinámica
+
+int numpasos = (int) (T_TOTAL/h) ; //Número de pasos temporales
+
+double ***crear_arreglo_dinamico(int N, int T) 
+{
+    // Asignar memoria para el arreglo dinámico
+    double ***arreglo = (double ***)malloc(N * sizeof(double **));
+
+    for (int i = 0; i < N; i++) {
+        arreglo[i] = (double **)malloc(2 * sizeof(double *));
+        for (int j = 0; j < 2; j++) {
+            arreglo[i][j] = (double *)malloc(numpasos * sizeof(double));
+        }
+    }
+
+    return arreglo;
+}
+
+
+//Libero la memoria de dichos arrays
+void liberar_arreglo_dinamico(double ***arreglo, int N) {
+    // Liberar la memoria asignada al arreglo dinámico
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < 2; j++) {
+            free(arreglo[i][j]);
+        }
+        free(arreglo[i]);
+    }
+    free(arreglo);
+}
 
 
 
@@ -274,9 +316,12 @@ int main(void)
         
     }
     //Inicializo la distancia entre partículas y la aceleración.
+    //También calculo la energía inicial.
     distancia(r, dr); 
 
     aceleracion(dr,a);
+
+    energia(dr, v, energiatxt);
 
 
     for(int i=0; i<N; i++)
@@ -287,7 +332,12 @@ int main(void)
         fprintf(veltxt, "%lf, %lf\n", v[i][0], v[i][1]); //Velocidades
         fprintf(aceltxt, "%lf, %lf\n", a[i][0], a[i][1]); //Aceleraciones
     }
-    fprintf(salida, "\n"); //Salto de línea para separar los pasos
+    //Salto de línea para separar los pasos
+    fprintf(salida, "\n");
+    fprintf(postxt, "\n");
+    fprintf(veltxt, "\n");
+    fprintf(aceltxt, "\n");
+    fprintf(energiatxt, "\n"); 
 
 
     //Ahora hago el bucle de la simulación. El tiempo total es T_TOTAL y el paso temporal es h.
@@ -298,12 +348,23 @@ int main(void)
         energia(dr, v, energiatxt);
     }
 
+    //Ahora leo y guardo en un array tridimensional las velocidades y posiciones en cada paso temporal.
+    
+    
+    double ***vel = crear_arreglo_dinamico(N, numpasos);
+    double ***pos = crear_arreglo_dinamico(N, numpasos); 
+
+
+
     //Cierro los ficheros.
     fclose(salida); 
     fclose(postxt); 
     fclose(veltxt); 
     fclose(aceltxt); 
-    fclose(energiatxt); 
+    fclose(energiatxt);
+    
+    liberar_arreglo_dinamico(vel, N); //Libero la memoria de las velocidades
+    liberar_arreglo_dinamico(pos, N); //Libero la memoria de las posiciones
     return 0;
 
 }
