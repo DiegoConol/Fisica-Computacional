@@ -245,12 +245,15 @@ El primer índice es el número de partículas, el segundo índice es 2 (x e y) 
 
 int numpasos = (int) (T_TOTAL/h) ; //Número de pasos temporales
 
-double ***crear_arreglo_dinamico(int N, int T) 
+//ESTE PASO ES NECESARIO PORQUE SINO PETA:
+int numparticulas = N; //Número de partículas
+
+double ***crear_arreglo_dinamico(int numparticulas, int numpasos) 
 {
     // Asignar memoria para el arreglo dinámico
     double ***arreglo = (double ***)malloc(N * sizeof(double **));
 
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < numparticulas; i++) {
         arreglo[i] = (double **)malloc(2 * sizeof(double *));
         for (int j = 0; j < 2; j++) {
             arreglo[i][j] = (double *)malloc(numpasos * sizeof(double));
@@ -262,9 +265,9 @@ double ***crear_arreglo_dinamico(int N, int T)
 
 
 //Libero la memoria de dichos arrays
-void liberar_arreglo_dinamico(double ***arreglo, int N) {
+void liberar_arreglo_dinamico(double ***arreglo, int numparticulas) {
     // Liberar la memoria asignada al arreglo dinámico
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < numparticulas; i++) {
         for (int j = 0; j < 2; j++) {
             free(arreglo[i][j]);
         }
@@ -323,6 +326,8 @@ int main(void)
 
     energia(dr, v, energiatxt);
 
+    double ***vel = crear_arreglo_dinamico(N, numpasos);
+    double ***pos = crear_arreglo_dinamico(N, numpasos); 
 
     for(int i=0; i<N; i++)
     {
@@ -351,8 +356,7 @@ int main(void)
     //Ahora leo y guardo en un array tridimensional las velocidades y posiciones en cada paso temporal.
     
     
-    double ***vel = crear_arreglo_dinamico(N, numpasos);
-    double ***pos = crear_arreglo_dinamico(N, numpasos); 
+
 
 
 
