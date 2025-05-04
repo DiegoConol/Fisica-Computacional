@@ -135,7 +135,8 @@ void aceleracion(double dr[N][N][2], double a[N][2])
 
 //Ahora hago el algoritmo de Verlet.
 
-void verlet(double r[N][2], double v[N][2], double a[N][2], double dr[N][N][2], FILE *file)
+void verlet(double r[N][2], double v[N][2], double a[N][2], double dr[N][N][2], FILE *salir, FILE *pos, FILE *vel, FILE *acel)
+
 {
     double omega[N][2]; //Vector auxiliar para la velocidad
 
@@ -181,9 +182,16 @@ void verlet(double r[N][2], double v[N][2], double a[N][2], double dr[N][N][2], 
 
     for (int i=0; i<N; i++)
     {
-        fprintf(file, "%lf, %lf, %lf, %lf, %lf, %lf\n", r[i][0], r[i][1], v[i][0], v[i][1], a[i][0], a[i][1]);
+        fprintf(salir, "%lf, %lf, %lf, %lf, %lf, %lf\n", r[i][0], r[i][1], v[i][0], v[i][1], a[i][0], a[i][1]);
+        fprintf(pos, "%lf, %lf\n", r[i][0], r[i][1]); //Posiciones
+        fprintf(vel, "%lf, %lf\n", v[i][0], v[i][1]); //Velocidades
+        fprintf(acel, "%lf, %lf\n", a[i][0], a[i][1]); //Aceleraciones
     }
-    fprintf(file, "\n"); //Salto de línea para separar los pasos
+    //Salto de línea para separar los pasos
+    fprintf(salir, "\n"); 
+    fprintf(pos, "\n"); 
+    fprintf(vel, "\n"); 
+    fprintf(acel, "\n"); 
 }
 
 
@@ -231,8 +239,13 @@ int main(void)
 {
 
     FILE *salida = fopen("SALIDA.txt", "w");        //Fichero de salida
+    FILE *postxt = fopen("posiciones.txt", "w"); //Fichero de posiciones
+    FILE *veltxt = fopen("velocidades.txt", "w"); //Fichero de velocidades
+    FILE *aceltxt = fopen("aceleraciones.txt", "w"); //Fichero de aceleraciones
     FILE *energiatxt = fopen("energia.txt", "w"); //Fichero de energía
-    if (salida == NULL || energiatxt == NULL) {
+
+
+    if (salida == NULL || energiatxt == NULL || postxt == NULL || veltxt == NULL || aceltxt == NULL) {
         printf("Error al abrir el archivo.\n");
         return 1;
     }
@@ -270,6 +283,9 @@ int main(void)
     {
         //Imprimo las posiciones y velocidades iniciales.
         fprintf(salida, "%lf, %lf, %lf, %lf, %lf, %lf\n", r[i][0], r[i][1], v[i][0], v[i][1], a[i][0], a[i][1]);
+        fprintf(postxt, "%lf, %lf\n", r[i][0], r[i][1]); //Posiciones
+        fprintf(veltxt, "%lf, %lf\n", v[i][0], v[i][1]); //Velocidades
+        fprintf(aceltxt, "%lf, %lf\n", a[i][0], a[i][1]); //Aceleraciones
     }
     fprintf(salida, "\n"); //Salto de línea para separar los pasos
 
@@ -278,11 +294,16 @@ int main(void)
     for (double t=0; t<T_TOTAL; t+=h)
     {
         
-        verlet(r, v, a, dr, salida);
+        verlet(r, v, a, dr, salida, postxt, veltxt, aceltxt);
         energia(dr, v, energiatxt);
     }
 
-    fclose(salida); //Cierro el fichero de salida
+    //Cierro los ficheros.
+    fclose(salida); 
+    fclose(postxt); 
+    fclose(veltxt); 
+    fclose(aceltxt); 
+    fclose(energiatxt); 
     return 0;
 
 }
