@@ -120,3 +120,52 @@ void aceleracion(double r[N][2], double a[N][2])
 }
 }
 
+//Ahora hago el algoritmo de Verlet.
+
+void verlet(double r[N][2], double v[N][2], double a[N][2], FILE *file)
+{
+    double omega[N][2]; //Vector auxiliar para la velocidad
+
+    //Actualizo posicicones (t+h) y calculo omega con velocidad en t
+    for (int i=0; i<N; i++)
+    {
+        r[i][0] += v[i][0]*h + 0.5*a[i][0]*h*h;     //Posición en x
+        r[i][1] += v[i][1]*h + 0.5*a[i][1]*h*h;     //Posición en y
+        omega[i][0] = v[i][0] + h/2*a[i][0];        //Velocidad en x
+        omega[i][1] = v[i][1] + h/2*a[i][1];        //Velocidad en y
+    }
+
+    //Actualizo la periodicidad de las posiciones
+    periodicidad(r);
+
+    //Actualizo las aceleraciones (t+h)
+    aceleracion(r,a);
+
+    //Actualizo las velocidades (t+h)
+    for (int i=0; i<N; i++)
+    {
+        v[i][0] = omega[i][0] + h/2*a[i][0];        //Velocidad en x
+        v[i][1] = omega[i][1] + h/2*a[i][1];        //Velocidad en y
+    }
+
+    //Pongo los nuevos parámetros r,v en el fichero.
+    /*
+    Se guardan así:
+    rx1, ry1, vx1, vy1
+    rx2, ry2, vx2, vy2
+    ...
+    rxN, ryN, vxN, vyN
+    "Salto de línea para separar los pasos"
+
+    rx1, ry1, vx1, vy1
+    rx2, ry2, vx2, vy2
+    ...
+    rxN, ryN, vxN, vyN
+    */
+
+    for (int i=0; i<N; i++)
+    {
+        fprintf(file, "%lf, %lf, %lf, %lf\n", r[i][0], r[i][1], v[i][0], v[i][1]);
+    }
+    fprintf(file, "\n"); //Salto de línea para separar los pasos
+}
