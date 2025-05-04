@@ -11,14 +11,17 @@
 
 
 
-#define Epsilon 1.0      //Constante de Unidades de potencial
-#define Sigma 1.0        //Constante de distancia
-#define KB 1.0           //Constante de Boltzmann
-#define N 100            //Número de partículas
-#define L 10.0           //Longitud de la caja LXL
-#define T 1.0            //Temperatura
-#define M 1.0            //Masa de las partículas
-#define h 0.01           //Paso temporal
+#define Epsilon 1.0         //Constante de Unidades de potencial
+#define Sigma 1.0           //Constante de distancia
+#define KB 1.0              //Constante de Boltzmann
+#define N 20               //Número de partículas
+#define L 10.0              //Longitud de la caja LXL
+#define T 1.0               //Temperatura
+#define M 1.0               //Masa de las partículas
+#define h 0.01              //Paso temporal
+#define PI 3.14159265       //Pi
+#define T_TOTAL 10.0        //Tiempo total de simulación
+
 
 
 
@@ -92,11 +95,7 @@ void distancia(double r[N][2], double dr[N][N][2])
 }
 
 
-
-
 //Ahora implemento la aceleración. F=m*a.
-
-
 
 
 void aceleracion(double r[N][2], double a[N][2])
@@ -168,4 +167,54 @@ void verlet(double r[N][2], double v[N][2], double a[N][2], FILE *file)
         fprintf(file, "%lf, %lf, %lf, %lf\n", r[i][0], r[i][1], v[i][0], v[i][1]);
     }
     fprintf(file, "\n"); //Salto de línea para separar los pasos
+}
+
+
+//Ahora hago la función principal.
+
+int main(void)
+{
+
+    FILE *salida = fopen("SALIDA.txt", "w");    //Fichero de salida
+    if (salida == NULL) {
+        printf("Error al abrir el archivo.\n");
+        return 1;
+    }
+
+    //Las posiciones iniciales y velocidad son aleatorias. Velocidades con módulo 1 y direcciones aleatorias.
+    srand(0); //Semilla para la aleatoriedad
+
+    //Las posiciones tienen que estar en la caja LXL, así que las inicializo aleatoriamente.
+    
+    for (int i=0; i<N; i++)
+    {
+        r[i][0] = ((double) rand() / (double) RAND_MAX)*L;  //Posición en x
+        r[i][1] = ((double) rand() / (double) RAND_MAX)*L;  //Posición en y
+
+        //Para la dirección cojo un ángulo aleatorio entre 0 y 2pi y lo paso a coordenadas cartesianas.
+
+        double theta = ((double) rand() / (double) RAND_MAX)*2*PI; //Dirección aleatoria
+        v[i][0] = cos(theta);   //Velocidad en x
+        v[i][1] = sin(theta);   //Velocidad en y
+
+        //Inicializo la aceleración en 0.0.
+        a[i][0] = 0.0;  //Aceleración en x
+        a[i][1] = 0.0;  //Aceleración en y
+    }
+
+
+
+    //Ahora hago el bucle de la simulación. El tiempo total es T_TOTAL y el paso temporal es h.
+    for (double t=0; t<T_TOTAL; t+=h)
+    {
+        //Calculo la distancia entre partículas.
+        distancia(r, dr);
+
+        //Calculo la aceleración de cada partícula.
+        aceleracion(r, a);
+
+        //Hago el algoritmo de Verlet.
+        verlet(r, v, a, salida);
+    }
+
 }
