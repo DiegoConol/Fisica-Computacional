@@ -15,8 +15,8 @@
 #define Epsilon 1.0         //Constante de Unidades de potencial
 #define Sigma 1.0           //Constante de distancia
 #define KB 1.0              //Constante de Boltzmann
-#define N 50               //Número de partículas
-#define L 50.0              //Longitud de la caja LXL
+#define N 20               //Número de partículas
+#define L 10.0              //Longitud de la caja LXL
 #define T 1.0               //Temperatura
 #define M 1.0               //Masa de las partículas
 #define h 0.002              //Paso temporal
@@ -220,6 +220,11 @@ void energia(double dr[N][N][2], double v[N][2], FILE *file)
 
 
 
+//Ahora hago la función de guardar las velocidades.
+
+
+
+
 //Ahora hago la función principal.
 
 int main(void)
@@ -246,9 +251,11 @@ int main(void)
 
         //Para la dirección cojo un ángulo aleatorio entre 0 y 2pi y lo paso a coordenadas cartesianas.
 
+        //PONGO UNA VELOCIDAD DE MODULO 10 por ejemplo
+
         double theta = ((double) rand() / (double) RAND_MAX)*2*PI; //Dirección aleatoria
-        v[i][0] = cos(theta);   //Velocidad en x
-        v[i][1] = sin(theta);   //Velocidad en y
+        v[i][0] = cos(theta)*10;   //Velocidad en x
+        v[i][1] = sin(theta)*10;   //Velocidad en y
 
         
         
