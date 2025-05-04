@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <time.h> //Para la semilla aleatoria
 #include <math.h> //Necesario para la potencia
 #include <stdlib.h> //Para el uso de rand() y srand()
 
@@ -14,11 +15,11 @@
 #define Epsilon 1.0         //Constante de Unidades de potencial
 #define Sigma 1.0           //Constante de distancia
 #define KB 1.0              //Constante de Boltzmann
-#define N 20               //Número de partículas
+#define N 10               //Número de partículas
 #define L 10.0              //Longitud de la caja LXL
 #define T 1.0               //Temperatura
 #define M 1.0               //Masa de las partículas
-#define h 0.01              //Paso temporal
+#define h 0.2              //Paso temporal
 #define PI 3.14159265       //Pi
 #define T_TOTAL 10.0        //Tiempo total de simulación
 
@@ -108,11 +109,16 @@ void aceleracion(double r[N][2], double a[N][2])
             if (i != j) //No calculamos la aceleración de una partícula sobre sí misma.
             {
                 double r = pow(dr[i][j][0]*dr[i][j][0] + dr[i][j][1]*dr[i][j][1], 0.5); //Distancia al cuadrado
+                if (r < 1e-10) {
+                    continue; // Evita calcular la aceleración si la distancia es muy pequeña
+                }
                 double acc = 4*Epsilon*(12*pow(Sigma,12)/pow(r,13)-6*pow(Sigma,6)/pow(r,7))/(M*r); //Aceleración
 
                 //Para evitar muchos cálculos, lo guardo en un vector auxiliar.
                 a[i][0] += acc*dr[i][j][0]; //Aceleración en x
                 a[i][1] += acc*dr[i][j][1]; //Aceleración en y
+                a[j][0] -= acc*dr[i][j][0]; //Aceleración en x
+                a[j][1] -= acc*dr[i][j][1]; //Aceleración en y
 
             }
     }
@@ -164,7 +170,7 @@ void verlet(double r[N][2], double v[N][2], double a[N][2], FILE *file)
 
     for (int i=0; i<N; i++)
     {
-        fprintf(file, "%lf, %lf, %lf, %lf\n", r[i][0], r[i][1], v[i][0], v[i][1]);
+        fprintf(file, "%lf, %lf, %lf, %lf, %lf, %lf\n", r[i][0], r[i][1], v[i][0], v[i][1], a[i][0], a[i][1]);
     }
     fprintf(file, "\n"); //Salto de línea para separar los pasos
 }
@@ -182,7 +188,9 @@ int main(void)
     }
 
     //Las posiciones iniciales y velocidad son aleatorias. Velocidades con módulo 1 y direcciones aleatorias.
-    srand(0); //Semilla para la aleatoriedad
+    
+    //Pongo la semilla aleatoria para que cada vez que ejecute el programa me de un resultado diferente.
+    srand(time(NULL));
 
     //Las posiciones tienen que estar en la caja LXL, así que las inicializo aleatoriamente.
     
@@ -197,10 +205,16 @@ int main(void)
         v[i][0] = cos(theta);   //Velocidad en x
         v[i][1] = sin(theta);   //Velocidad en y
 
-        //Inicializo la aceleración en 0.0.
-        a[i][0] = 0.0;  //Aceleración en x
-        a[i][1] = 0.0;  //Aceleración en y
+        
+        
     }
+    aceleracion(r,a); //Calculo la aceleración inicial.
+    for(int i=0; i<N; i++)
+    {
+        //Imprimo las posiciones y velocidades iniciales.
+        fprintf(salida, "%lf, %lf, %lf, %lf, %lf, %lf\n", r[i][0], r[i][1], v[i][0], v[i][1], a[i][0], a[i][1]);
+    }
+    fprintf(salida, "\n"); //Salto de línea para separar los pasos
 
 
 
@@ -216,5 +230,8 @@ int main(void)
         //Hago el algoritmo de Verlet.
         verlet(r, v, a, salida);
     }
+
+    fclose(salida); //Cierro el fichero de salida
+    return 0;
 
 }
