@@ -17,11 +17,10 @@
 #define KB 1.0              //Constante de Boltzmann
 #define N 50               //Número de partículas
 #define L 10.0              //Longitud de la caja LXL
-#define T 1.0               //Temperatura
 #define M 1.0               //Masa de las partículas
 #define h 0.002              //Paso temporal
 #define PI 3.14159265       //Pi
-#define T_TOTAL 3.0        //Tiempo total de simulación
+#define T_TOTAL 60        //Tiempo total de simulación
 
 
 
@@ -291,7 +290,7 @@ int main(void)
     FILE *veltxt = fopen("velocidades.txt", "w"); //Fichero de velocidades
     FILE *aceltxt = fopen("aceleraciones.txt", "w"); //Fichero de aceleraciones
     FILE *energiatxt = fopen("energia.txt", "w"); //Fichero de energía
-    FILE *comprobacion = fopen("comprobacion.txt", "w"); //Fichero de comprobación de velocidades
+    FILE *cinetica = fopen("cinetica.txt", "w"); //Fichero de energía cinética
 
 
     if (salida == NULL || energiatxt == NULL || postxt == NULL || veltxt == NULL || aceltxt == NULL) {
@@ -331,15 +330,15 @@ int main(void)
     double ***vel = crear_arreglo_dinamico(N, numpasos);
     double ***pos = crear_arreglo_dinamico(N, numpasos);
 
-    double K[numpasos];  
+    double K[numpasos];
+    double T[numpasos];  
 
     distancia(r, dr); 
 
     aceleracion(dr,a);
 
     K[0]= energia(dr, v, energiatxt);
-    printf("Energía inicial: %lf\n", K[0]);
-
+    T[0]= K[0]/(KB);
 
 
     for(int i=0; i<N; i++)
@@ -349,6 +348,7 @@ int main(void)
         fprintf(postxt, "%lf, %lf\n", r[i][0], r[i][1]); //Posiciones
         fprintf(veltxt, "%lf, %lf\n", v[i][0], v[i][1]); //Velocidades
         fprintf(aceltxt, "%lf, %lf\n", a[i][0], a[i][1]); //Aceleraciones
+        fprintf(cinetica, "%lf\n", K[0]); //Energía cinética inicial
     }
     //Salto de línea para separar los pasos
     fprintf(salida, "\n");
@@ -361,9 +361,14 @@ int main(void)
     //Ahora hago el bucle de la simulación. El tiempo total es T_TOTAL y el paso temporal es h.
     for (int t=0; t<numpasos; t++)
     {
+        if (t % (numpasos / 100) == 0) {
+            printf("Progreso: %d%% completado\n", (t * 100) / numpasos);
+            fflush(stdout); // Con esto no se raya, lo suelta por pantalla siempre.
+        }
         
         verlet(r, v, a, dr, salida, postxt, veltxt, aceltxt);
         K[t+1]=energia(dr, v, energiatxt);
+        T[t+1]= K[t+1]/(KB);
 
         //Actualizo las posiciones y velocidades en el array tridimensional.
         for (int i=0; i<N; i++)
@@ -372,11 +377,10 @@ int main(void)
             vel[i][1][t] = v[i][1]; //Velocidad en y
             pos[i][0][t] = r[i][0]; //Posición en x
             pos[i][1][t] = r[i][1]; //Posición en y
-            fprintf(comprobacion, "%lf, %lf\n", vel[i][0][t], vel[i][1][t]); //Comprobación de velocidades
         }
-        fprintf(comprobacion, "\n"); //Salto de línea para separar los pasos
-        printf("%d, %lf\n",t, K[t+1]);
+        fprintf(cinetica, "%lf\n", K[t+1]); //Energía cinética
     }
+
 
 
     //Cierro los ficheros.
@@ -385,6 +389,7 @@ int main(void)
     fclose(veltxt); 
     fclose(aceltxt); 
     fclose(energiatxt);
+    fclose(cinetica);
     
     liberar_arreglo_dinamico(vel, N); //Libero la memoria de las velocidades
     liberar_arreglo_dinamico(pos, N); //Libero la memoria de las posiciones
