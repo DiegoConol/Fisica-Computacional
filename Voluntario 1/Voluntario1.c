@@ -19,7 +19,7 @@
 #define L 10.0              //Longitud de la caja LXL
 #define T 1.0               //Temperatura
 #define M 1.0               //Masa de las partículas
-#define h 0.01              //Paso temporal
+#define h 0.002              //Paso temporal
 #define PI 3.14159265       //Pi
 #define T_TOTAL 10.0        //Tiempo total de simulación
 
@@ -116,7 +116,7 @@ void aceleracion(double dr[N][N][2], double a[N][2])
         {
             if (i != j) //No calculamos la aceleración de una partícula sobre sí misma.
             {
-                double r = pow(dr[i][j][0]*dr[i][j][0] + dr[i][j][1]*dr[i][j][1], 0.5); //Distancia al cuadrado
+                double r = pow(dr[i][j][0]*dr[i][j][0] + dr[i][j][1]*dr[i][j][1], 0.5); //Distancia
                 if (r < 1e-10) {
                     continue; // Evita calcular la aceleración si la distancia es muy pequeña
                 }
@@ -187,13 +187,45 @@ void verlet(double r[N][2], double v[N][2], double a[N][2], double dr[N][N][2], 
 }
 
 
+
+//Ahora hago la energía potencial y cinética. La energía total es la suma de ambas.
+
+void energia(double dr[N][N][2], double v[N][2], FILE *file)
+{
+    double U= 0.0;          //Energía potencial
+    double K= 0.0;          //Energía cinética
+    double E = 0.0;         //Energía total
+
+    for (int i=0; i<N; i++)
+    {
+        K += 0.5*M*(v[i][0]*v[i][0] + v[i][1]*v[i][1]); //Energía cinética
+        for (int j=0; j<N; j++)
+        {
+            if (i != j) //No calculamos la energía potencial de una partícula sobre sí misma.
+            {
+                double r = pow(dr[i][j][0]*dr[i][j][0] + dr[i][j][1]*dr[i][j][1], 0.5); //Distancia
+                if (r < 1e-10) {
+                    continue; 
+                }
+                U += 4*Epsilon*(pow(Sigma,12)/pow(r,12)-pow(Sigma,6)/pow(r,6)); //Energía potencial
+            }
+        }
+    }
+
+
+    fprintf(file, "%lf, %lf, %lf\n",K, U, E); //Escribo la energía total en el fichero
+}
+
+
+
 //Ahora hago la función principal.
 
 int main(void)
 {
 
-    FILE *salida = fopen("SALIDA.txt", "w");    //Fichero de salida
-    if (salida == NULL) {
+    FILE *salida = fopen("SALIDA.txt", "w");        //Fichero de salida
+    FILE *energiatxt = fopen("energia.txt", "w"); //Fichero de energía
+    if (salida == NULL || energiatxt == NULL) {
         printf("Error al abrir el archivo.\n");
         return 1;
     }
@@ -238,6 +270,7 @@ int main(void)
     {
         
         verlet(r, v, a, dr, salida);
+        energia(dr, v, energiatxt);
     }
 
     fclose(salida); //Cierro el fichero de salida
