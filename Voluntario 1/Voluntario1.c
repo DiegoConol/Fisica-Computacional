@@ -15,7 +15,7 @@
 #define Epsilon 1.0         //Constante de Unidades de potencial
 #define Sigma 1.0           //Constante de distancia
 #define KB 1.0              //Constante de Boltzmann
-#define N 20               //Número de partículas
+#define N 50               //Número de partículas
 #define L 10.0              //Longitud de la caja LXL
 #define T 1.0               //Temperatura
 #define M 1.0               //Masa de las partículas
@@ -201,7 +201,7 @@ void verlet(double r[N][2], double v[N][2], double a[N][2], double dr[N][N][2], 
 
 //Ahora hago la energía potencial y cinética. La energía total es la suma de ambas.
 
-void energia(double dr[N][N][2], double v[N][2], FILE *file)
+double energia(double dr[N][N][2], double v[N][2], FILE *file)
 {
     double U= 0.0;          //Energía potencial
     double K= 0.0;          //Energía cinética
@@ -227,6 +227,7 @@ void energia(double dr[N][N][2], double v[N][2], FILE *file)
 
 
     fprintf(file, "%lf, %lf, %lf\n",K, U, E); //Escribo la energía total en el fichero
+    return K; //Devuelvo la energía cinética para luego ussarla en K = kbT y calcular T.
 }
 
 
@@ -278,6 +279,8 @@ void liberar_arreglo_dinamico(double ***arreglo, int numparticulas) {
 
 
 
+
+
 //Ahora hago la función principal.
 
 int main(void)
@@ -288,6 +291,7 @@ int main(void)
     FILE *veltxt = fopen("velocidades.txt", "w"); //Fichero de velocidades
     FILE *aceltxt = fopen("aceleraciones.txt", "w"); //Fichero de aceleraciones
     FILE *energiatxt = fopen("energia.txt", "w"); //Fichero de energía
+    FILE *comprobacion = fopen("comprobacion.txt", "w"); //Fichero de comprobación de velocidades
 
 
     if (salida == NULL || energiatxt == NULL || postxt == NULL || veltxt == NULL || aceltxt == NULL) {
@@ -304,30 +308,39 @@ int main(void)
     
     for (int i=0; i<N; i++)
     {
-        r[i][0] = ((double) rand() / (double) RAND_MAX)*L;  //Posición en x
-        r[i][1] = ((double) rand() / (double) RAND_MAX)*L;  //Posición en y
+        //Voy a poner las posiciones como si estuvieran en una cuadricula, así estarán distribuidas uniformemente.
+        //El poner el N+1 es para que no ocupe los bordes de la caja.
+
+        r[i][0] = (i % (int)sqrt(N) + 1) * (L / ((int)sqrt(N) + 1));
+        r[i][1] = (i / (int)sqrt(N) + 1) * (L / ((int)sqrt(N) + 1));
 
         //Para la dirección cojo un ángulo aleatorio entre 0 y 2pi y lo paso a coordenadas cartesianas.
 
-        //PONGO UNA VELOCIDAD DE MODULO 10 por ejemplo
+        //PONGO UNA VELOCIDAD DE MODULO 4 por ejemplo
 
         double theta = ((double) rand() / (double) RAND_MAX)*2*PI; //Dirección aleatoria
-        v[i][0] = cos(theta)*10;   //Velocidad en x
-        v[i][1] = sin(theta)*10;   //Velocidad en y
+        v[i][0] = cos(theta)*4.0;   //Velocidad en x
+        v[i][1] = sin(theta)*4.0;   //Velocidad en y
 
         
         
     }
     //Inicializo la distancia entre partículas y la aceleración.
     //También calculo la energía inicial.
+
+    double ***vel = crear_arreglo_dinamico(N, numpasos);
+    double ***pos = crear_arreglo_dinamico(N, numpasos);
+
+    double K[numpasos];  
+
     distancia(r, dr); 
 
     aceleracion(dr,a);
 
-    energia(dr, v, energiatxt);
+    K[0]= energia(dr, v, energiatxt);
+    printf("Energía inicial: %lf\n", K[0]);
 
-    double ***vel = crear_arreglo_dinamico(N, numpasos);
-    double ***pos = crear_arreglo_dinamico(N, numpasos); 
+
 
     for(int i=0; i<N; i++)
     {
@@ -346,18 +359,24 @@ int main(void)
 
 
     //Ahora hago el bucle de la simulación. El tiempo total es T_TOTAL y el paso temporal es h.
-    for (double t=0; t<T_TOTAL; t+=h)
+    for (int t=0; t<numpasos; t++)
     {
         
         verlet(r, v, a, dr, salida, postxt, veltxt, aceltxt);
-        energia(dr, v, energiatxt);
+        K[t+1]=energia(dr, v, energiatxt);
+
+        //Actualizo las posiciones y velocidades en el array tridimensional.
+        for (int i=0; i<N; i++)
+        {
+            vel[i][0][t] = v[i][0]; //Velocidad en x
+            vel[i][1][t] = v[i][1]; //Velocidad en y
+            pos[i][0][t] = r[i][0]; //Posición en x
+            pos[i][1][t] = r[i][1]; //Posición en y
+            fprintf(comprobacion, "%lf, %lf\n", vel[i][0][t], vel[i][1][t]); //Comprobación de velocidades
+        }
+        fprintf(comprobacion, "\n"); //Salto de línea para separar los pasos
+        printf("%d, %lf\n",t, K[t+1]);
     }
-
-    //Ahora leo y guardo en un array tridimensional las velocidades y posiciones en cada paso temporal.
-    
-    
-
-
 
 
     //Cierro los ficheros.
