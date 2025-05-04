@@ -15,13 +15,13 @@
 #define Epsilon 1.0         //Constante de Unidades de potencial
 #define Sigma 1.0           //Constante de distancia
 #define KB 1.0              //Constante de Boltzmann
-#define N 10               //Número de partículas
-#define L 10.0              //Longitud de la caja LXL
+#define N 50               //Número de partículas
+#define L 50.0              //Longitud de la caja LXL
 #define T 1.0               //Temperatura
 #define M 1.0               //Masa de las partículas
 #define h 0.002              //Paso temporal
 #define PI 3.14159265       //Pi
-#define T_TOTAL 10.0        //Tiempo total de simulación
+#define T_TOTAL 3.0        //Tiempo total de simulación
 
 
 
@@ -211,6 +211,8 @@ void energia(double dr[N][N][2], double v[N][2], FILE *file)
             }
         }
     }
+
+    E= K + U; //Energía total
 
 
     fprintf(file, "%lf, %lf, %lf\n",K, U, E); //Escribo la energía total en el fichero
