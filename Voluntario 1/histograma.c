@@ -127,6 +127,7 @@ int main (void)
 
 
     //Calculo la velocidad media y la distribución de velocidades de maxwell:
+    double sumatotalcuadr=0.0;
 
     for (int t = t_min; t < t_max; t++) {
         if (t >= numpasos) { // Verificar que t no exceda numpasos
@@ -134,22 +135,36 @@ int main (void)
             liberar_arreglo_dinamico(vel, N);
             return 1;
         }
-
+        
         double suma_v = 0.0;
         for (int i = 0; i < N; i++) {
             suma_v += sqrt(vel[i][0][t] * vel[i][0][t] + vel[i][1][t] * vel[i][1][t]);
+            sumatotalcuadr += (vel[i][0][t] * vel[i][0][t] + vel[i][1][t] * vel[i][1][t]);
+        }
+        
+        v_media[t - t_min] = suma_v / N; // Velocidad media
     }
-    v_media[t - t_min] = suma_v / N; // Velocidad media
-    maxwell[t - t_min] = sqrt(M/(K[t]))*suma_v/N*exp((-suma_v*suma_v)/(2*K[t]*N*N));
 
+    //Para sacar la v_media total cojo sumatotal y lo divido entre el número de pasos y N:
+    double v_media_total = sumatotalcuadr /(t_max - t_min);
+
+    //Con esto calculo la temperatura media:
+    double T_media = M * v_media_total/ (2*KB);
+    printf("La temperatura media es: %lf\n", T_media);
+
+    //Ahora sí puedo calcular la distribución de velocidades de maxwell:
+
+    for (int t = t_min; t < t_max; t++) {
+        maxwell[t - t_min] = M/(T_media)*v_media[t - t_min]*exp((-v_media[t - t_min]*v_media[t - t_min]*M)/(2*T_media));
     }
+
 
     // Guardo los datos en fichero:
     
 
     for (int t = t_min; t < t_max; t++) {
         fprintf(histograma, "%lf\n", v_media[t - t_min]);
-        fprintf(maxwelltxt, "%lf\n", maxwell[t - t_min]);
+        fprintf(maxwelltxt, "%lf %lf\n", v_media[t-t_min], maxwell[t - t_min]);
     }
     fclose(histograma);
     fclose(maxwelltxt);
