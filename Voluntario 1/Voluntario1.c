@@ -15,7 +15,7 @@
 #define Epsilon 1.0         //Constante de Unidades de potencial
 #define Sigma 1.0           //Constante de distancia
 #define KB 1.0              //Constante de Boltzmann
-#define N 50               //Número de partículas
+#define N 20               //Número de partículas
 #define L 10.0              //Longitud de la caja LXL
 #define M 1.0               //Masa de las partículas
 #define h 0.002              //Paso temporal
@@ -318,8 +318,8 @@ int main(void)
         //PONGO UNA VELOCIDAD DE MODULO 4 por ejemplo
 
         double theta = ((double) rand() / (double) RAND_MAX)*2*PI; //Dirección aleatoria
-        v[i][0] = cos(theta)*4.0;   //Velocidad en x
-        v[i][1] = sin(theta)*4.0;   //Velocidad en y
+        v[i][0] = cos(theta)*1.0;   //Velocidad en x
+        v[i][1] = sin(theta)*1.0;   //Velocidad en y
 
         
         
