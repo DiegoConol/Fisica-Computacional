@@ -162,7 +162,7 @@ int main (void)
     double v_media_total = sumatotalcuadr /(t_max - t_min);
 
     //Con esto calculo la temperatura media:
-    double T_media = M * v_media_total/ (2*KB);
+    double T_media = M * v_media_total/ (2*N*KB);
     printf("La temperatura media es: %lf\n", T_media);
 
 
@@ -170,13 +170,26 @@ int main (void)
     //Ahora calculo la velocidad de verdad para el histograma:
 
     double v_histograma[N];
+    double v_histograma_x[N];
+    double v_histograma_y[N];
 
     for(int t=t_min; t<t_max; t++)
     {
         for (int i=0; i<N; i++)
         {
             v_histograma[i] = sqrt(vel[i][0][t]*vel[i][0][t] + vel[i][1][t]*vel[i][1][t]);
-            fprintf(histograma, "%lf\n", v_histograma[i]);
+            if(vel[i][0][t]>0.0)
+            v_histograma_x[i] = vel[i][0][t];
+            else
+            v_histograma_x[i] = -vel[i][0][t];
+
+            if(vel[i][1][t]>0.0)
+            v_histograma_y[i] = vel[i][1][t];
+            else
+            v_histograma_y[i] = -vel[i][1][t];
+
+            fprintf(histograma, "%lf %lf %lf\n", v_histograma[i], v_histograma_x[i], v_histograma_y[i]); // Guardar las velocidades en el archivo
+
             v_histograma[i] = 0.0; // Reiniciar el valor para la siguiente iteración (me ahorro lo de la memoria pero es más ineficiente)
         }
     }
