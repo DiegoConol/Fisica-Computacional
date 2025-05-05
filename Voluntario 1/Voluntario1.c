@@ -200,10 +200,11 @@ void verlet(double r[N][2], double v[N][2], double a[N][2], double dr[N][N][2], 
 
 //Ahora hago la energía potencial y cinética. La energía total es la suma de ambas.
 
+
 double energia(double dr[N][N][2], double v[N][2], FILE *file)
 {
-    double U= 0.0;          //Energía potencial
-    double K= 0.0;          //Energía cinética
+    double U = 0.0;          //Energía potencial
+    double K = 0.0;          //Energía cinética
     double E = 0.0;         //Energía total
 
     for (int i=0; i<N; i++)
@@ -281,6 +282,7 @@ void liberar_arreglo_dinamico(double ***arreglo, int numparticulas) {
 
 
 //Ahora hago la función principal.
+
 
 int main(void)
 {
