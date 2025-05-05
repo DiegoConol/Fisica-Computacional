@@ -35,9 +35,14 @@ Copio lo necesario de Voluntario1.c para que funcione.
 
 #define a 20 //Valor mínimo del histograma
 #define b 50 //Valor máximo del histograma
+#define NUM_BINS 30
+#define V_MAX 10.0 // Velocidad máxima para el histograma
 
 
 int numpasos = (int) (T_TOTAL/h) ; //Número de pasos temporales
+int t_min_pasos = a/h; //Número de pasos temporales mínimo
+int t_max_pasos = b/h; //Número de pasos temporales máximo
+
 
 //ESTE PASO ES NECESARIO PORQUE SINO PETA:
 int numparticulas = N; //Número de partículas
@@ -71,26 +76,31 @@ void liberar_arreglo_dinamico(double ***arreglo, int numparticulas) {
 }
 
 
+double maxwell_distribucion(double v, double T)
+{
+    return (M*v/(KB*T))*exp((-M*v*v)/(2*KB*T));
+}
+
 int main (void)
 {
     FILE *veltxt = fopen("velocidades.txt", "r"); //Fichero de velocidades
     FILE *cinetica = fopen("cinetica.txt", "r"); //Fichero de energía
     FILE *histograma = fopen("histograma.txt", "w"); // Fichero del histograma
-    FILE *maxwelltxt = fopen("maxwell.txt", "w"); // Fichero de la distribución de velocidades de maxwell
 
 
 
-    if (cinetica == NULL || veltxt == NULL || histograma == NULL || maxwelltxt == NULL) {
+    if (cinetica == NULL || veltxt == NULL || histograma == NULL) {
         printf("Error al abrir el archivo.\n");
         return 1;
     }
 
     double ***vel = crear_arreglo_dinamico(N, numpasos);
     double K[numpasos];
-    double T[numpasos];
 
     // Leer los valores de K desde cinetica.txt
+
     for (int t = 0; t < numpasos; t++) {
+
     if (fscanf(cinetica, "%lf", &K[t]) != 1) {
         printf("Error al leer el archivo cinetica.txt en el paso %d.\n", t);
         fclose(cinetica);
@@ -98,7 +108,10 @@ int main (void)
         return 1;
         }
     }
+
+
     // Leer las velocidades desde velocidades.txt
+
     for (int t = 0; t < numpasos; t++) {
         for (int i = 0; i < N; i++) {
             if (fscanf(veltxt, "%lf, %lf", &vel[i][0][t], &vel[i][1][t]) != 2) {
@@ -114,7 +127,7 @@ int main (void)
 
     fclose(cinetica);
     fclose(veltxt);
-
+    
     //Vamos ahora con la creación del histograma:
     //Calculo ahora la velocidad media en cada segundo.
     int tiempo = numpasos / T_TOTAL;
@@ -126,7 +139,7 @@ int main (void)
     double maxwell[t_max - t_min]; 
 
 
-    //Calculo la velocidad media y la distribución de velocidades de maxwell:
+    //Calculo la velocidad media para saber la temperatura media: NO SE HACE PARA EL HISTOGRAMA, SINO PARA LA TEMPERATURA MEDIA:
     double sumatotalcuadr=0.0;
 
     for (int t = t_min; t < t_max; t++) {
@@ -152,22 +165,30 @@ int main (void)
     double T_media = M * v_media_total/ (2*KB);
     printf("La temperatura media es: %lf\n", T_media);
 
-    //Ahora sí puedo calcular la distribución de velocidades de maxwell:
 
-    for (int t = t_min; t < t_max; t++) {
-        maxwell[t - t_min] = M/(T_media)*v_media[t - t_min]*exp((-v_media[t - t_min]*v_media[t - t_min]*M)/(2*T_media));
+
+    //Ahora calculo la velocidad de verdad para el histograma:
+
+    double v_histograma[N];
+
+    for(int t=t_min; t<t_max; t++)
+    {
+        for (int i=0; i<N; i++)
+        {
+            v_histograma[i] = sqrt(vel[i][0][t]*vel[i][0][t] + vel[i][1][t]*vel[i][1][t]);
+            fprintf(histograma, "%lf\n", v_histograma[i]);
+            v_histograma[i] = 0.0; // Reiniciar el valor para la siguiente iteración (me ahorro lo de la memoria pero es más ineficiente)
+        }
     }
 
 
     // Guardo los datos en fichero:
     
 
-    for (int t = t_min; t < t_max; t++) {
-        fprintf(histograma, "%lf\n", v_media[t - t_min]);
-        fprintf(maxwelltxt, "%lf %lf\n", v_media[t-t_min], maxwell[t - t_min]);
+    for (int t = 0; t < N; t++) {
+        fprintf(histograma, "%lf\n", v_histograma[t]);
     }
     fclose(histograma);
-    fclose(maxwelltxt);
     liberar_arreglo_dinamico(vel, N); //Libero la memoria de las velocidades
     
 }

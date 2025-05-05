@@ -13,7 +13,7 @@ entre los tiempos t=20 y t=50.
 #define Epsilon 1.0         // Constante de Unidades de potencial
 #define Sigma 1.0           // Constante de distancia
 #define KB 1.0              // Constante de Boltzmann
-#define N 50                // Número de partículas
+#define N 20                // Número de partículas
 #define L 10.0              // Longitud de la caja LXL
 #define M 1.0               // Masa de las partículas
 #define h 0.002             // Paso temporal
@@ -173,16 +173,31 @@ int main(void)
         fprintf(maxwelltxt, "%lf\t%lf\n", v_central, maxwell_valor);
     }
     
-    // Escribir un archivo separado con todas las velocidades para análisis adicionales
+    // Escribir todas las velocidades individuales para análisis en Python
     FILE *todas_velocidades = fopen("todas_velocidades.txt", "w");
     if (todas_velocidades != NULL) {
         for (int i = 0; i < contador_velocidades; i++) {
             fprintf(todas_velocidades, "%lf\n", velocidades_totales[i]);
         }
         fclose(todas_velocidades);
+        printf("Archivo 'todas_velocidades.txt' generado para análisis en Python.\n");
     }
     
-    
+    // Escribir datos para Maxwell en un formato adecuado para Python
+    FILE *maxwell_data = fopen("maxwell_data.txt", "w");
+    if (maxwell_data != NULL) {
+        // Guardar la temperatura para que Python pueda usarla
+        fprintf(maxwell_data, "# Temperatura: %lf\n", T_media);
+        
+        // Crear un rango de velocidades más fino para la curva teórica
+        double v_step = V_MAX / 100.0;
+        for (double v = 0; v < V_MAX; v += v_step) {
+            double maxwell_valor = maxwell_2D(v, T_media);
+            fprintf(maxwell_data, "%lf\t%lf\n", v, maxwell_valor);
+        }
+        fclose(maxwell_data);
+        printf("Archivo 'maxwell_data.txt' generado para análisis en Python.\n");
+    }
     
     fclose(histograma);
     fclose(maxwelltxt);
