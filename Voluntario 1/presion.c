@@ -4,13 +4,9 @@
 #include <math.h> //Necesario para la potencia
 #include <stdlib.h> //Para el uso de rand() y srand()
 
-
-
 //Este programa uso el algoritmo de Verlet para simular un gas en dos dimensionas con potencial de Lennard-Jones.
 
 //Ahora defino las constantes:
-
-
 
 #define Epsilon 1.0         //Constante de Unidades de potencial
 #define Sigma 1.0           //Constante de distancia
@@ -24,11 +20,10 @@
 #define Tiempo_Estabilizacion 1 //Tiempo de estabilización
 #define mod 10 //Modulo de la velocidad
 
+int numpasos = (int) (T_TOTAL/h) ; //Número de pasos temporales
 
-
-
-
-
+//ESTE PASO ES NECESARIO PORQUE SINO PETA:
+int numparticulas = N; //Número de partículas
 
 //Primero a qué posición y velocidad inicial tienen las partículas:
 //N es las particulas, 2 es para las coordenadas x e y.
@@ -36,15 +31,11 @@
 double r[N][2]; //Posición de las partículas
 double v[N][2]; //Velocidad de las partículas
 double a[N][2]; //Aceleración de las partículas
-double momento = 0.0; //Momento total de las partículas
 
 //Ahora hago el vector diferencia de posiciones:
-
 double dr[N][N][2]; //Diferencia de posiciones entre partículas i y j.
 
-
 //Voy a empezar por la condición de periodicidad. Estamos en una caja de LXL.
-
 void periodicidad(double r[N][2])
 {
     for (int i=0; i<N; i++)
@@ -63,7 +54,6 @@ void periodicidad(double r[N][2])
     }
 }
 
-
 void periodicidad_presion(double r[N][2], double *momento, double v[N][2])
 {
     for (int i=0; i<N; i++)
@@ -73,24 +63,31 @@ void periodicidad_presion(double r[N][2], double *momento, double v[N][2])
             if (r[i][j] > L)
             {
                 r[i][j] -= L;
-                *momento += v[i][j];
-                
+                if (v[i][j]<0.0)
+                {
+                    *momento -= 2.0*v[i][j]*M;
+                }
+                else
+                    *momento += 2.0*v[i][j]*M;
             }
             else if (r[i][j] < 0)
             {
                 r[i][j] += L;
-                *momento -= v[i][j];
+                if (v[i][j]<0.0)
+                {
+                    *momento -= 2.0*v[i][j]*M;
+                }
+                else
+                    *momento += 2.0*v[i][j]*M;
             }
         }
     }
 }
 
-
 //Ahora hago las distancias entre partículas.
 /*
     El vector: dr[N][N][2] es la diferencia de posiciones entre partículas i y j.
     donde dr[1][2][0] = x1-x2 y dr[1][2][1] = y1-y2 por ejemplo
-
 */
 
 void distancia(double r[N][2], double dr[N][N][2])
@@ -105,31 +102,26 @@ void distancia(double r[N][2], double dr[N][N][2])
                 double b=r[i][1]-r[j][1]; //Diferencia en y
 
                 if (a> L/2)
-                dr[i][j][0] = a - L; 
+                    dr[i][j][0] = a - L; 
                 else if (a < -L/2)
-                dr[i][j][0] = a + L; 
+                    dr[i][j][0] = a + L; 
                 else
-                dr[i][j][0] = a; 
+                    dr[i][j][0] = a; 
 
                 if (b> L/2)
-                dr[i][j][1] = b - L; 
+                    dr[i][j][1] = b - L; 
                 else if (b < -L/2)
-                dr[i][j][1] = b + L; 
+                    dr[i][j][1] = b + L; 
                 else
-                dr[i][j][1] = b;
-
+                    dr[i][j][1] = b;
             }
         }
     }
 }
 
-
 //Ahora implemento la aceleración. F=m*a.
-
-
 void aceleracion(double dr[N][N][2], double a[N][2])
 {
-
     //Inicializo la aceleración a 0.
     for (int i=0; i<N; i++)
     {
@@ -139,7 +131,7 @@ void aceleracion(double dr[N][N][2], double a[N][2])
 
     for (int i=0; i<N; i++)
     {
-    for (int j=0; j<N; j++)
+        for (int j=0; j<N; j++)
         {
             if (i != j) //No calculamos la aceleración de una partícula sobre sí misma.
             {
@@ -154,16 +146,13 @@ void aceleracion(double dr[N][N][2], double a[N][2])
                 a[i][1] += acc*dr[i][j][1]; //Aceleración en y
                 a[j][0] -= acc*dr[i][j][0]; //Aceleración en x
                 a[j][1] -= acc*dr[i][j][1]; //Aceleración en y
-
             }
+        }
     }
-}
 }
 
 //Ahora hago el algoritmo de Verlet.
-
-void verlet(double r[N][2], double v[N][2], double a[N][2], double dr[N][N][2], double t, FILE *salir, FILE *pos, FILE *vel, FILE *acel)
-
+void verlet(double r[N][2], double v[N][2], double a[N][2], double dr[N][N][2], double t, double *momento, FILE *salir, FILE *pos, FILE *vel, FILE *acel, FILE *mom)
 {
     double omega[N][2]; //Vector auxiliar para la velocidad
 
@@ -177,13 +166,16 @@ void verlet(double r[N][2], double v[N][2], double a[N][2], double dr[N][N][2], 
     }
 
     //Actualizo la periodicidad de las posiciones
-    if (t<Tiempo_Estabilizacion/h) //Si no es estable, no pongo el momento
+    if (t < Tiempo_Estabilizacion/h) //Si no es estable, no pongo el momento
     {
         periodicidad(r);
     }
     else //Si sí es estable, pongo el momento.
     {
-        periodicidad_presion(r, &momento, v);
+        double momento_antes = *momento;
+        periodicidad_presion(r, momento, v);
+        // Registramos el momento en cada paso (después del tiempo de estabilización)
+        fprintf(mom, "%lf\n", *momento);
     }
 
     //Actualizo la distancia entre partículas (t+h)
@@ -200,20 +192,6 @@ void verlet(double r[N][2], double v[N][2], double a[N][2], double dr[N][N][2], 
     }
 
     //Pongo los nuevos parámetros r,v en el fichero.
-    /*
-    Se guardan así:
-    rx1, ry1, vx1, vy1
-    rx2, ry2, vx2, vy2
-    ...
-    rxN, ryN, vxN, vyN
-    "Salto de línea para separar los pasos"
-
-    rx1, ry1, vx1, vy1
-    rx2, ry2, vx2, vy2
-    ...
-    rxN, ryN, vxN, vyN
-    */
-
     for (int i=0; i<N; i++)
     {
         fprintf(salir, "%lf, %lf, %lf, %lf, %lf, %lf\n", r[i][0], r[i][1], v[i][0], v[i][1], a[i][0], a[i][1]);
@@ -228,11 +206,7 @@ void verlet(double r[N][2], double v[N][2], double a[N][2], double dr[N][N][2], 
     fprintf(acel, "\n"); 
 }
 
-
-
 //Ahora hago la energía potencial y cinética. La energía total es la suma de ambas.
-
-
 double energia(double dr[N][N][2], double v[N][2], FILE *file)
 {
     double U = 0.0;          //Energía potencial
@@ -255,32 +229,13 @@ double energia(double dr[N][N][2], double v[N][2], FILE *file)
         }
     }
 
-    E= K + U; //Energía total
+    E = K + U; //Energía total
 
-
-    fprintf(file, "%lf, %lf, %lf\n",K, U, E); //Escribo la energía total en el fichero
-    return K; //Devuelvo la energía cinética para luego ussarla en K = kbT y calcular T.
+    fprintf(file, "%lf, %lf, %lf\n", K, U, E); //Escribo la energía total en el fichero
+    return K; //Devuelvo la energía cinética para luego usarla en K = kbT y calcular T.
 }
 
-
-
-//Ahora hago la función de guardar las velocidades.
-
-/* ################### VOY A USAR MEMORIA DINÁMICA PARA GUARDAR LAS VELOCIDADES Y POSICIONES EN CADA PASO ###################
-
-
-Es una función muy grande.
-Crea memoria para un array tridimensional de tamaño N x 2 x numpasos.
-El primer índice es el número de partículas, el segundo índice es 2 (x e y) y el tercer índice es el número de pasos temporales.
-*/
-
 //Ahora hago la función de guardar las velocidades y posiciones con memoria dinámica
-
-int numpasos = (int) (T_TOTAL/h) ; //Número de pasos temporales
-
-//ESTE PASO ES NECESARIO PORQUE SINO PETA:
-int numparticulas = N; //Número de partículas
-
 double ***crear_arreglo_dinamico(int numparticulas, int numpasos) 
 {
     // Asignar memoria para el arreglo dinámico
@@ -296,7 +251,6 @@ double ***crear_arreglo_dinamico(int numparticulas, int numpasos)
     return arreglo;
 }
 
-
 //Libero la memoria de dichos arrays
 void liberar_arreglo_dinamico(double ***arreglo, int numparticulas) {
     // Liberar la memoria asignada al arreglo dinámico
@@ -310,26 +264,19 @@ void liberar_arreglo_dinamico(double ***arreglo, int numparticulas) {
 }
 
 
-
-
-
 //Ahora hago la función principal.
-
-
 int main(void)
 {
-
     FILE *salida = fopen("SALIDA.txt", "w");        //Fichero de salida
     FILE *postxt = fopen("posiciones.txt", "w"); //Fichero de posiciones
     FILE *veltxt = fopen("velocidades.txt", "w"); //Fichero de velocidades
     FILE *aceltxt = fopen("aceleraciones.txt", "w"); //Fichero de aceleraciones
     FILE *energiatxt = fopen("energia.txt", "w"); //Fichero de energía
     FILE *cinetica = fopen("cinetica.txt", "w"); //Fichero de energía cinética
-    FILE *momento = fopen("momento.txt", "w"); //Fichero de momento
+    FILE *momentotxt = fopen("momento.txt", "w"); //Fichero de momento
 
-
-    if (salida == NULL || energiatxt == NULL || postxt == NULL || veltxt == NULL || aceltxt == NULL) {
-        printf("Error al abrir el archivo.\n");
+    if (salida == NULL || energiatxt == NULL || postxt == NULL || veltxt == NULL || aceltxt == NULL || momentotxt == NULL) {
+        printf("Error al abrir uno o más archivos.\n");
         return 1;
     }
 
@@ -339,26 +286,19 @@ int main(void)
     srand(time(NULL));
 
     //Las posiciones tienen que estar en la caja LXL, así que las inicializo aleatoriamente.
-    
     for (int i=0; i<N; i++)
     {
         //Voy a poner las posiciones como si estuvieran en una cuadricula, así estarán distribuidas uniformemente.
         //El poner el N+1 es para que no ocupe los bordes de la caja.
-
         r[i][0] = (i % (int)sqrt(N) + 1) * (L / ((int)sqrt(N) + 1));
         r[i][1] = (i / (int)sqrt(N) + 1) * (L / ((int)sqrt(N) + 1));
 
-        //Para la dirección cojo un ángulo aleatorio entre 0 y 2pi y lo paso a coordenadas cartesianas.
-
-        //PONGO UNA VELOCIDAD DE MODULO 4 por ejemplo
 
         double theta = ((double) rand() / (double) RAND_MAX)*2*PI; //Dirección aleatoria
         v[i][0] = cos(theta)*mod;   //Velocidad en x
         v[i][1] = sin(theta)*mod;   //Velocidad en y
-
-        
-        
     }
+    
     //Inicializo la distancia entre partículas y la aceleración.
     //También calculo la energía inicial.
 
@@ -366,15 +306,17 @@ int main(void)
     double ***pos = crear_arreglo_dinamico(N, numpasos);
 
     double K[numpasos];
-    double T[numpasos];  
+    double T[numpasos];
+
+    double momento = 0.0; //Momento total de las partículas  
 
     distancia(r, dr); 
+    aceleracion(dr, a);
 
-    aceleracion(dr,a);
+    K[0] = energia(dr, v, energiatxt);
+    T[0] = K[0]/(KB);
 
-    K[0]= energia(dr, v, energiatxt);
-    T[0]= K[0]/(KB);
-
+    fprintf(momentotxt, "%lf\n", momento); // Escribir el momento inicial (0.0)
 
     for(int i=0; i<N; i++)
     {
@@ -392,7 +334,6 @@ int main(void)
     fprintf(aceltxt, "\n");
     fprintf(energiatxt, "\n"); 
 
-
     //Ahora hago el bucle de la simulación. El tiempo total es T_TOTAL y el paso temporal es h.
     for (int t=0; t<numpasos; t++)
     {
@@ -401,9 +342,9 @@ int main(void)
             fflush(stdout); // Con esto no se raya, lo suelta por pantalla siempre.
         }
         
-        verlet(r, v, a, dr, t, salida, postxt, veltxt, aceltxt);
-        K[t+1]=energia(dr, v, energiatxt);
-        T[t+1]= K[t+1]/(KB);
+        verlet(r, v, a, dr, t, &momento, salida, postxt, veltxt, aceltxt, momentotxt);
+        K[t+1] = energia(dr, v, energiatxt);
+        T[t+1] = K[t+1]/(KB);
 
         //Actualizo las posiciones y velocidades en el array tridimensional.
         for (int i=0; i<N; i++)
@@ -415,10 +356,12 @@ int main(void)
         }
         fprintf(cinetica, "%lf\n", K[t+1]); //Energía cinética
     }
-    printf("Momento total: %lf\n", momento); //Imprimo el momento total al final de la simulación
+    
+
+
+    
+    printf("Momento total: %lf\n", momento);
     printf("Progreso: 100%% completado\n"); //Para que no se quede en 99%
-
-
 
     //Cierro los ficheros.
     fclose(salida); 
@@ -427,10 +370,9 @@ int main(void)
     fclose(aceltxt); 
     fclose(energiatxt);
     fclose(cinetica);
-    fclose(momento);
+    fclose(momentotxt);
     
     liberar_arreglo_dinamico(vel, N); //Libero la memoria de las velocidades
     liberar_arreglo_dinamico(pos, N); //Libero la memoria de las posiciones
     return 0;
-
 }
