@@ -1,0 +1,9 @@
+Aqui se presentan los datos recopilados para el apartado 3 y ver si es linealmente dependiente con la temperatura:
+Modulo velocidad    Presion temperatura
+1   0.105865    20.766561
+2   0.220683    44.399577
+3   0.387129    77.325533
+4   0.662318    132.407602
+5   1.031456    207.036568
+7   1.922997    381.443143
+10  3.928455    796.501473

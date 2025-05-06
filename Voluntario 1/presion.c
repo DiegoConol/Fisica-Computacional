@@ -11,14 +11,14 @@
 #define Epsilon 1.0         //Constante de Unidades de potencial
 #define Sigma 1.0           //Constante de distancia
 #define KB 1.0              //Constante de Boltzmann
-#define N 20               //Número de partículas
+#define N 16               //Número de partículas
 #define L 10.0              //Longitud de la caja LXL
 #define M 1.0               //Masa de las partículas
 #define h 0.002              //Paso temporal
 #define PI 3.14159265       //Pi
-#define T_TOTAL 5        //Tiempo total de simulación
-#define Tiempo_Estabilizacion 1 //Tiempo de estabilización
-#define mod 10 //Modulo de la velocidad
+#define T_TOTAL 60        //Tiempo total de simulación
+#define Tiempo_Estabilizacion 20 //Tiempo de estabilización
+#define mod 7 //Modulo de la velocidad
 
 int numpasos = (int) (T_TOTAL/h) ; //Número de pasos temporales
 
@@ -65,20 +65,20 @@ void periodicidad_presion(double r[N][2], double *momento, double v[N][2])
                 r[i][j] -= L;
                 if (v[i][j]<0.0)
                 {
-                    *momento -= 2.0*v[i][j]*M;
+                    *momento -= v[i][j]*M;
                 }
                 else
-                    *momento += 2.0*v[i][j]*M;
+                    *momento += v[i][j]*M;
             }
             else if (r[i][j] < 0)
             {
                 r[i][j] += L;
                 if (v[i][j]<0.0)
                 {
-                    *momento -= 2.0*v[i][j]*M;
+                    *momento -= v[i][j]*M;
                 }
                 else
-                    *momento += 2.0*v[i][j]*M;
+                    *momento += v[i][j]*M;
             }
         }
     }
@@ -174,8 +174,10 @@ void verlet(double r[N][2], double v[N][2], double a[N][2], double dr[N][N][2], 
     {
         double momento_antes = *momento;
         periodicidad_presion(r, momento, v);
-        // Registramos el momento en cada paso (después del tiempo de estabilización)
-        fprintf(mom, "%lf\n", *momento);
+        // Registramos el momento en cada paso si se actualiza(después del tiempo de estabilización)
+        if (momento_antes != *momento) {
+            fprintf(mom, "%lf\n", *momento); 
+        }
     }
 
     //Actualizo la distancia entre partículas (t+h)
@@ -308,7 +310,7 @@ int main(void)
     double K[numpasos];
     double T[numpasos];
 
-    double momento = 0.0; //Momento total de las partículas  
+    double momento = 0.0; //Momento total de las partículas SIEMPRE POSITIVO 
 
     distancia(r, dr); 
     aceleracion(dr, a);
@@ -361,6 +363,28 @@ int main(void)
 
     
     printf("Momento total: %lf\n", momento);
+
+
+
+
+    //Ahora con el momento final y el tiempo, calculo la presión.
+
+
+    double presion = 2*momento/(L*(T_TOTAL-Tiempo_Estabilizacion)); //Presión
+
+    printf("Presión: %lf\n", presion); //Imprimo la presión
+    printf("La temperatura es: %lf\n", T[numpasos-1]);
+
+
+
+
+
+
+
+
+
+
+
     printf("Progreso: 100%% completado\n"); //Para que no se quede en 99%
 
     //Cierro los ficheros.
