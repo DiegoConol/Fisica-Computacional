@@ -21,6 +21,7 @@
 #define h 0.002              //Paso temporal
 #define PI 3.14159265       //Pi
 #define T_TOTAL 60        //Tiempo total de simulación
+#define mod 7 //Modulo de la velocidad
 
 
 
@@ -320,8 +321,8 @@ int main(void)
         //PONGO UNA VELOCIDAD DE MODULO 4 por ejemplo
 
         double theta = ((double) rand() / (double) RAND_MAX)*2*PI; //Dirección aleatoria
-        v[i][0] = cos(theta)*1.0;   //Velocidad en x
-        v[i][1] = sin(theta)*1.0;   //Velocidad en y
+        v[i][0] = cos(theta)*mod;   //Velocidad en x
+        v[i][1] = sin(theta)*mod;   //Velocidad en y
 
         
         

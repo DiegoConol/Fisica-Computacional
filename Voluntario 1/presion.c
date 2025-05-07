@@ -18,7 +18,7 @@
 #define PI 3.14159265       //Pi
 #define T_TOTAL 60        //Tiempo total de simulación
 #define Tiempo_Estabilizacion 20 //Tiempo de estabilización
-#define mod 7 //Modulo de la velocidad
+#define mod 1 //Modulo de la velocidad
 
 int numpasos = (int) (T_TOTAL/h) ; //Número de pasos temporales
 
@@ -316,7 +316,7 @@ int main(void)
     aceleracion(dr, a);
 
     K[0] = energia(dr, v, energiatxt);
-    T[0] = K[0]/(KB);
+    T[0] = K[0]/(KB*N);
 
     fprintf(momentotxt, "%lf\n", momento); // Escribir el momento inicial (0.0)
 
@@ -346,7 +346,7 @@ int main(void)
         
         verlet(r, v, a, dr, t, &momento, salida, postxt, veltxt, aceltxt, momentotxt);
         K[t+1] = energia(dr, v, energiatxt);
-        T[t+1] = K[t+1]/(KB);
+        T[t+1] = K[t+1]/(KB*N);
 
         //Actualizo las posiciones y velocidades en el array tridimensional.
         for (int i=0; i<N; i++)
