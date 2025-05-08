@@ -15,13 +15,13 @@
 #define Epsilon 1.0         //Constante de Unidades de potencial
 #define Sigma 1.0           //Constante de distancia
 #define KB 1.0              //Constante de Boltzmann
-#define N 20               //Número de partículas
+#define N 49               //Número de partículas
 #define L 10.0              //Longitud de la caja LXL
 #define M 1.0               //Masa de las partículas
 #define h 0.002              //Paso temporal
 #define PI 3.14159265       //Pi
 #define T_TOTAL 60        //Tiempo total de simulación
-#define mod 7 //Modulo de la velocidad
+#define mod 1 //Modulo de la velocidad
 
 
 

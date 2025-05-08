@@ -284,7 +284,25 @@ void liberar_arreglo_dinamico(double ***arreglo, int numparticulas) {
      //r1 es la posición inicial, r2 es la posición arbitraria.
 
      double f[N][2];
-     double fluc;
+     double fluc = 0.0;
+     for (int i=0; i<N; i++)
+     {
+         f[i][0] = -r1[i][0]+r2[i][0]; //Fluctuación en x
+         f[i][1] = -r1[i][1]+r2[i][1]; //Fluctuación en y
+         fluc += pow(f[i][0]*f[i][0] + f[i][1]*f[i][1], 0.5)/N; //Fluctuación total
+         fprintf(file, "%lf\n", fluc); //Escribo la fluctuación en el fichero
+     }
+     
+ }
+
+ /* FLUCTUACION POR SI ACASO
+ void fluctuacion(double r1[N][2], double r2[N][2], FILE *file)
+ {
+
+     //r1 es la posición inicial, r2 es la posición arbitraria.
+
+     double f[N][2];
+     double fluc = 0.0;
      for (int i=0; i<N; i++)
      {
          f[i][0] = -r1[i][0]+r2[i][0]; //Fluctuación en x
@@ -295,6 +313,9 @@ void liberar_arreglo_dinamico(double ***arreglo, int numparticulas) {
      fprintf(file, "\n"); //Salto de línea para separar los pasos
      
  }
+ 
+ 
+ */
 
 
 
@@ -375,7 +396,7 @@ int main(void)
         fprintf(veltxt, "%lf, %lf\n", v[i][0], v[i][1]); //Velocidades
         fprintf(aceltxt, "%lf, %lf\n", a[i][0], a[i][1]); //Aceleraciones
         fprintf(cinetica, "%lf\n", K[0]); //Energía cinética inicial
-        fprintf(fluctuaciontxt, "%lf\n", 0.0); //Fluctuación inicial
+        /*fprintf(fluctuaciontxt, "%lf\n", 0.0); //Fluctuación inicial*/
     }
     //Salto de línea para separar los pasos
     fprintf(salida, "\n");
@@ -383,7 +404,7 @@ int main(void)
     fprintf(veltxt, "\n");
     fprintf(aceltxt, "\n");
     fprintf(energiatxt, "\n"); 
-    fprintf(fluctuaciontxt, "\n");
+    //fprintf(fluctuaciontxt, "\n");
 
     //A continuación pongo variables para controlar el tiempo de la simulación.
     //EL APARTADO 6 SE BASA EN AUMENTAR LA TEMPERATURA POCO A POCO, ASI QUE TRAS LAS MARCAS REESCALAMOS LA VELOCIDAD.
