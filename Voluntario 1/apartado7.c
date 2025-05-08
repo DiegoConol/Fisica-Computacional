@@ -295,10 +295,10 @@ int main(void)
     FILE *aceltxt = fopen("aceleraciones.txt", "w"); //Fichero de aceleraciones
     FILE *energiatxt = fopen("energia.txt", "w"); //Fichero de energía
     FILE *cinetica = fopen("cinetica.txt", "w"); //Fichero de energía cinética
-    FILE *fluctuacionunatxt = fopen("fluctuacionuna.txt", "w"); //Fichero de fluctuación
+    FILE *fluctuacion7txt = fopen("fluctuacion7.txt", "w"); //Fichero de fluctuación
 
 
-    if (salida == NULL || energiatxt == NULL || postxt == NULL || veltxt == NULL || aceltxt == NULL || cinetica == NULL || fluctuacionunatxt == NULL) {
+    if (salida == NULL || energiatxt == NULL || postxt == NULL || veltxt == NULL || aceltxt == NULL || cinetica == NULL || fluctuacion7txt == NULL) {
         printf("Error al abrir el archivo.\n");
         return 1;
     }
@@ -449,7 +449,7 @@ int main(void)
         if (t %(numpasosmedio)==0)
         {
             flucmedia[i] = flucmedia[i]/(numpasosmedio);
-            fprintf(fluctuacionunatxt, "%lf\n", flucmedia[i]);
+            fprintf(fluctuacion7txt, "%lf\n", flucmedia[i]);
             flucmedia[i] = 0.0; 
 
         }
@@ -457,7 +457,7 @@ int main(void)
         if (t %(numpasosmedio)==0)
         {
 
-            fprintf(fluctuacionunatxt, "\n"); //Salto de línea para separar los pasos
+            fprintf(fluctuacion7txt, "\n"); //Salto de línea para separar los pasos
 
         }
         /*{double f[N][2];
@@ -622,7 +622,7 @@ int main(void)
     fclose(aceltxt); 
     fclose(energiatxt);
     fclose(cinetica);
-    fclose(fluctuacionunatxt);
+    fclose(fluctuacion7txt);
     
     liberar_arreglo_dinamico(vel, N); //Libero la memoria de las velocidades
     liberar_arreglo_dinamico(pos, N); //Libero la memoria de las posiciones
