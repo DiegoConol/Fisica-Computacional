@@ -26,7 +26,7 @@ Copio lo necesario de Voluntario1.c para que funcione.
 #define Epsilon 1.0         //Constante de Unidades de potencial
 #define Sigma 1.0           //Constante de distancia
 #define KB 1.0              //Constante de Boltzmann
-#define N 49               //Número de partículas
+#define N 20               //Número de partículas
 #define L 10.0              //Longitud de la caja LXL
 #define M 1.0               //Masa de las partículas
 #define h 0.002              //Paso temporal
