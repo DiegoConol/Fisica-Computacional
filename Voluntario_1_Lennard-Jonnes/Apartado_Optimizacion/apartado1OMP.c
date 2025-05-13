@@ -20,6 +20,7 @@ el "#pragma omp parallel for reductor(+:K)" sirve para acumular datos en el vect
 
 COMPILAR CON EL COMANDO:
 gcc -fopenmp apartado1OMP.c -o programa
+gcc -fopenmp -O3 apartado1OMP.c -o apartado1
 
 Puedes cambiar -o con -o2, -o3, -ofast.
 
