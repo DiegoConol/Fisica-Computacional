@@ -46,7 +46,7 @@ Puedes cambiar -o con -o2, -o3, -ofast.
 #define M 1.0               //Masa de las partículas
 #define h 0.002              //Paso temporal
 #define PI 3.14159265       //Pi
-#define T_TOTAL 600        //Tiempo total de simulación
+#define T_TOTAL 1000        //Tiempo total de simulación
 #define mod 1 //Modulo de la velocidad
 
 
