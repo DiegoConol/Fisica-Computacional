@@ -1,0 +1,2 @@
+En este archivo se ponen los datos para distintos N y mi ordenador y Joel con distintas optimizaciones.
+N, tiempo total, paso h, mi ordenador, mi pc o1, mi pc o2, mi pc o3, mi pc ofast, joel, joel o1, joel o2, joel o3, joel ofast
