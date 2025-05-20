@@ -349,7 +349,9 @@ int main(void)
     srand(time(NULL));
 
     //Las posiciones tienen que estar en la caja LXL, así que las inicializo aleatoriamente.
-    
+
+
+    #pragma omp parallel for
     for (int i=0; i<N; i++)
     {
         //Voy a poner las posiciones como si estuvieran en una cuadricula, así estarán distribuidas uniformemente.

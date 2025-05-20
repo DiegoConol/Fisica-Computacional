@@ -3,6 +3,7 @@
 #include <time.h> //Para la semilla aleatoria
 #include <math.h> //Necesario para la potencia
 #include <stdlib.h> //Para el uso de rand() y srand()
+#include <omp.h>
 
 
 
