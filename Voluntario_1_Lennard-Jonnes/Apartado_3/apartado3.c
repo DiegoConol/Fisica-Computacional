@@ -18,7 +18,7 @@
 #define PI 3.14159265       //Pi
 #define T_TOTAL 60        //Tiempo total de simulación
 #define Tiempo_Estabilizacion 20 //Tiempo de estabilización
-#define mod 1 //Modulo de la velocidad
+#define mod 10 //Modulo de la velocidad
 
 int numpasos = (int) (T_TOTAL/h) ; //Número de pasos temporales
 

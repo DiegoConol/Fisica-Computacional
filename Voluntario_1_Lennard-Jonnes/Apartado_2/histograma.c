@@ -26,7 +26,7 @@ Copio lo necesario de Voluntario1.c para que funcione.
 #define Epsilon 1.0         //Constante de Unidades de potencial
 #define Sigma 1.0           //Constante de distancia
 #define KB 1.0              //Constante de Boltzmann
-#define N 49               //Número de partículas
+#define N 20               //Número de partículas
 #define L 10.0              //Longitud de la caja LXL
 #define M 1.0               //Masa de las partículas
 #define h 0.002              //Paso temporal
@@ -36,7 +36,7 @@ Copio lo necesario de Voluntario1.c para que funcione.
 #define a 20 //Valor mínimo del histograma
 #define b 50 //Valor máximo del histograma
 #define NUM_BINS 30
-#define V_MAX 10.0 // Velocidad máxima para el histograma
+#define V_MAX 20.0 // Velocidad máxima para el histograma
 
 
 int numpasos = (int) (T_TOTAL/h) ; //Número de pasos temporales

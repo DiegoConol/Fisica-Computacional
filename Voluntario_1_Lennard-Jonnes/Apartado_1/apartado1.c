@@ -312,9 +312,10 @@ int main(void)
     {
         //Voy a poner las posiciones como si estuvieran en una cuadricula, así estarán distribuidas uniformemente.
         //El poner el N+1 es para que no ocupe los bordes de la caja.
+        //También sumo un numero aleatorio para que no sea una caja perfecta.
 
-        r[i][0] = (i % (int)sqrt(N) + 1) * (L / ((int)sqrt(N) + 1));
-        r[i][1] = (i / (int)sqrt(N) + 1) * (L / ((int)sqrt(N) + 1));
+        r[i][0] = (i % (int)sqrt(N) + 1) * (L / ((int)sqrt(N) + 1)) + 0.1*(rand()/(double)RAND_MAX);
+        r[i][1] = (i / (int)sqrt(N) + 1) * (L / ((int)sqrt(N) + 1)) + 0.1*(rand()/(double)RAND_MAX);
 
         //Para la dirección cojo un ángulo aleatorio entre 0 y 2pi y lo paso a coordenadas cartesianas.
 

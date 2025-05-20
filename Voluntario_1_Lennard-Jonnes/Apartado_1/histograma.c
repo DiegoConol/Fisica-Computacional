@@ -1,7 +1,7 @@
 /*
 
 Este programa usa los datos de velocidades.txt para hacer un histograma de velocidades.
-Copio lo necesario de Voluntario1.c para que funcione.
+Copio lo necesario de apartado1.c para que funcione.
 
 */
 

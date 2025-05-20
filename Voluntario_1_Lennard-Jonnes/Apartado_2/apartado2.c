@@ -15,7 +15,7 @@
 #define Epsilon 1.0         //Constante de Unidades de potencial
 #define Sigma 1.0           //Constante de distancia
 #define KB 1.0              //Constante de Boltzmann
-#define N 49               //Número de partículas
+#define N 20               //Número de partículas
 #define L 10.0              //Longitud de la caja LXL
 #define M 1.0               //Masa de las partículas
 #define h 0.002              //Paso temporal
@@ -313,16 +313,16 @@ int main(void)
         //Voy a poner las posiciones como si estuvieran en una cuadricula, así estarán distribuidas uniformemente.
         //El poner el N+1 es para que no ocupe los bordes de la caja.
 
-        r[i][0] = (i % (int)sqrt(N) + 1) * (L / ((int)sqrt(N) + 1));
-        r[i][1] = (i / (int)sqrt(N) + 1) * (L / ((int)sqrt(N) + 1));
+        r[i][0] = (i % (int)sqrt(N) + 1) * (L / ((int)sqrt(N) + 1)) + 0.1*(rand()/(double)RAND_MAX);
+        r[i][1] = (i / (int)sqrt(N) + 1) * (L / ((int)sqrt(N) + 1)) + 0.1*(rand()/(double)RAND_MAX);
 
         //Para la dirección cojo un ángulo aleatorio entre 0 y 2pi y lo paso a coordenadas cartesianas.
 
         //PONGO UNA VELOCIDAD DE MODULO 4 por ejemplo
 
-        double theta = ((double) rand() / (double) RAND_MAX)*2*PI; //Dirección aleatoria
-        v[i][0] = cos(theta)*mod;   //Velocidad en x
-        v[i][1] = sin(theta)*mod;   //Velocidad en y
+        double theta = ((double) rand() / (double) RAND_MAX); //Dirección aleatoria
+        v[i][0] = theta*mod;   //Velocidad en x
+        v[i][1] = 0.0;   //Velocidad en y
 
         
         
