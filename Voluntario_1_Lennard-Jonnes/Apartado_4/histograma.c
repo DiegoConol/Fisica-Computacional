@@ -1,7 +1,7 @@
 /*
 
 Este programa usa los datos de velocidades.txt para hacer un histograma de velocidades.
-Copio lo necesario de Voluntario1.c para que funcione.
+Copio lo necesario de apartado4.c para que funcione.
 
 */
 
@@ -26,8 +26,8 @@ Copio lo necesario de Voluntario1.c para que funcione.
 #define Epsilon 1.0         //Constante de Unidades de potencial
 #define Sigma 1.0           //Constante de distancia
 #define KB 1.0              //Constante de Boltzmann
-#define N 49               //Número de partículas
-#define L 10.0              //Longitud de la caja LXL
+#define N 16               //Número de partículas
+#define L 4.0              //Longitud de la caja LXL
 #define M 1.0               //Masa de las partículas
 #define h 0.002              //Paso temporal
 #define PI 3.14159265       //Pi

@@ -310,17 +310,17 @@ int main(void)
         //Modifico un poco las posiciones para que estén centradas en la caja, por eso el +0.5
 
         /*ESTO ES PARA EL APARTADO 4: CUADRICULA*/
-        r[i][0] = (i % (int)sqrt(N)) * (L / ((int)sqrt(N)))+0.5;
+        /*r[i][0] = (i % (int)sqrt(N)) * (L / ((int)sqrt(N)))+0.5;
         r[i][1] = (i / (int)sqrt(N)) * (L / ((int)sqrt(N)))+0.5;
-        
+        */
         //Para la dirección cojo un ángulo aleatorio entre 0 y 2pi y lo paso a coordenadas cartesianas.
 
 
         /* PARA EL APARTADO 5 NO ME SALE DE HEXAGONAL ASÍ QUE HAGO QUE LA CUADRICULA SEA UN POCO DESORDENADA CON SRAND*/
-        /*
-        r[i][0] = ((i % (int)sqrt(N)) * (L / ((int)sqrt(N)))+0.5)+((double) rand() / (double) RAND_MAX)*0.3;
-        r[i][1] = ((i / (int)sqrt(N)) * (L / ((int)sqrt(N)))+0.5) + ((double) rand() / (double) RAND_MAX)*0.3;
-        */
+        
+        r[i][0] = ((i % (int)sqrt(N)) * (L / ((int)sqrt(N)))+0.5)+((double) rand() / (double) RAND_MAX)*0.2;
+        r[i][1] = ((i / (int)sqrt(N)) * (L / ((int)sqrt(N)))+0.5) + ((double) rand() / (double) RAND_MAX)*0.2;
+        
 
         //PONGO UNA VELOCIDAD DE MODULO MOD
 
