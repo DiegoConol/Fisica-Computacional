@@ -76,11 +76,6 @@ void liberar_arreglo_dinamico(double ***arreglo, int numparticulas) {
 }
 
 
-double maxwell_distribucion(double v, double T)
-{
-    return (M*v/(KB*T))*exp((-M*v*v)/(2*KB*T));
-}
-
 int main (void)
 {
     FILE *veltxt = fopen("velocidades.txt", "r"); //Fichero de velocidades

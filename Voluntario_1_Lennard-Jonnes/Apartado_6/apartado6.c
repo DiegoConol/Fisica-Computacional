@@ -289,6 +289,17 @@ void liberar_arreglo_dinamico(double ***arreglo, int numparticulas) {
      {
          f[i][0] = -r1[i][0]+r2[i][0]; //Fluctuación en x
          f[i][1] = -r1[i][1]+r2[i][1]; //Fluctuación en y
+         
+        if(f[i][0] > L/2)
+            f[i][0] -= L; //Condición de periodicidad
+        if(f[i][0] < -L/2)
+            f[i][0] += L;
+
+        if(f[i][1] > L/2)
+            f[i][1] -= L;
+        if(f[i][1] < -L/2)
+            f[i][1] += L;
+
          fluc += (f[i][0]*f[i][0] + f[i][1]*f[i][1])/N; //Fluctuación total
          
      }
@@ -306,6 +317,15 @@ void liberar_arreglo_dinamico(double ***arreglo, int numparticulas) {
      {
          f[i][0] = -r1[i][0]+r2[i][0]; //Fluctuación en x
          f[i][1] = -r1[i][1]+r2[i][1]; //Fluctuación en y
+         if(f[i][0] > L/2)
+            f[i][0] -= L; //Condición de periodicidad
+        if(f[i][0] < -L/2)
+            f[i][0] += L;
+
+        if(f[i][1] > L/2)
+            f[i][1] -= L;
+        if(f[i][1] < -L/2)
+            f[i][1] += L;
          fluc = f[i][0]*f[i][0] + f[i][1]*f[i][1]; //Fluctuación total
          fprintf(file, "%lf\n", fluc); //Escribo la fluctuación en el fichero
      }
