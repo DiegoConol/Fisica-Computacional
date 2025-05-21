@@ -24,7 +24,7 @@ Este es un programa que hace un pendulo doble y exporta los datos de los angulos
 #define m2 1.0 // masa del segundo pendulo
 #define l1 1.0 // longitud del primer pendulo
 #define l2 1.0 // longitud del segundo pendulo
-#define E 2.0 //Energía total del sistema.
+#define E 10.0 //Energía total del sistema.
 
 //Creo el vector que tendrá las coordenadas: [theta, phi, momento de theta, momento de phi]
 
@@ -40,7 +40,7 @@ void hamiltoniano(double vector[4], FILE *file)
     double auxt = y[2]-y[3]*cos(y[0]-y[1]);
     double auxp = 2*y[3]-y[2]*cos(y[0]-y[1]);
 
-    H = 1.0/aux1/aux1*(auxt*auxt+1/2*auxp*auxp+auxt*auxp*cos(y[0]-y[1]))+g*(3-cos(y[0]-y[1]));
+    H = 1.0/aux1/aux1*(auxt*auxt+1/2*auxp*auxp+auxt*auxp*cos(y[0]-y[1]))+g*(3-cos(y[0])-cos(y[1]));
 
     fprintf(file, "%lf\n", H);
 
@@ -138,10 +138,9 @@ void rungekutta (double vector[4])
 
     for(int i=0; i<4; ++i)
     {
-        vector[i]+= 1/6*(k[i][0]+2*k[i][1]+2*k[i][2]+k[i][3]);
+        vector[i]+= 1.0/6.0*(k[i][0]+2*k[i][1]+2*k[i][2]+k[i][3]);
 
     }
-    return 0;
 }
 
 
@@ -151,12 +150,12 @@ void rungekutta (double vector[4])
 int main(void)
 {
 
-    FILE *posiciones=("angulos.txt");
-    FILE *velocidades=("velocidades.txt");
-    FILE *hamiltonianotxt=("hamiltoniano.txt");
-    FILE *pendulo=("pendulo.txt");
+    FILE *angulostxt = fopen("angulos.txt", "w"); 
+    FILE *momentostxt = fopen("momentos.txt", "w");
+    FILE *hamiltonianotxt = fopen("hamiltoniano.txt", "w");
+    FILE *pendulotxt = fopen("pendulo.txt", "w");
 
-    if (posiciones == NULL || velocidades == NULL || hamiltonianotxt == NULL || pendulo == NULL) {
+    if (angulostxt == NULL || momentostxt == NULL || hamiltonianotxt == NULL || pendulotxt == NULL) {
         printf("Error al abrir el archivo.\n");
         return 1;
     }
@@ -178,15 +177,17 @@ int main(void)
     {
         rungekutta(y);
         hamiltoniano(y, hamiltonianotxt);
+        fprintf(angulostxt, "%lf, %lf\n", y[0], y[1]);
+        fprintf(momentostxt, "%lf, %lf\n", y[2], y[3]);
 
     }
 
 
 
-    fclose(posiciones);
-    fclose(velocidades);
-    fclose(hamiltoniano);
-    fclose(pendulo);
+    fclose(angulostxt);
+    fclose(momentostxt);
+    fclose(hamiltonianotxt);
+    fclose(pendulotxt);
 
 
 }
