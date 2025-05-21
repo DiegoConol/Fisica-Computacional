@@ -24,7 +24,7 @@ Este es un programa que hace un pendulo doble y exporta los datos de los angulos
 #define m2 1.0 // masa del segundo pendulo
 #define l1 1.0 // longitud del primer pendulo
 #define l2 1.0 // longitud del segundo pendulo
-#define E 10.0 //Energía total del sistema.
+#define E 3.0 //Energía total del sistema.
 
 //Creo el vector que tendrá las coordenadas: [theta, phi, momento de theta, momento de phi]
 
@@ -40,7 +40,7 @@ void hamiltoniano(double vector[4], FILE *file)
     double auxt = y[2]-y[3]*cos(y[0]-y[1]);
     double auxp = 2*y[3]-y[2]*cos(y[0]-y[1]);
 
-    H = 1.0/aux1/aux1*(auxt*auxt+1/2*auxp*auxp+auxt*auxp*cos(y[0]-y[1]))+g*(3-cos(y[0])-cos(y[1]));
+    H = 1.0/aux1/aux1*(auxt*auxt+1/2*auxp*auxp+auxt*auxp*cos(y[0]-y[1]))+g*(3-2*cos(y[0])-cos(y[1]));
 
     fprintf(file, "%lf\n", H);
 
