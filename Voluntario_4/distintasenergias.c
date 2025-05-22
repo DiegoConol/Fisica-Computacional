@@ -14,8 +14,8 @@ Este es un programa que hace un pendulo doble y exporta los datos de los angulos
 
 #define g 9.81
 #define PI 3.14159265
-#define T_TOTAL 30 //tiempo total. (No recomendable poner más de 30, sino se raya. Poner 30 o bajar el paso.)
-#define h 0.001 //paso temporal
+#define T_TOTAL 45 //tiempo total. (No recomendable poner más de 30, sino se raya. Poner 30 o bajar el paso.)
+#define h 0.0001 //paso temporal
 
 //Los parámetros del pendulo (según el voluntario son =1 para simplifcar el problema)
 
@@ -25,7 +25,11 @@ Este es un programa que hace un pendulo doble y exporta los datos de los angulos
 #define l2 1.0 // longitud del segundo pendulo
 double E = 0.0;
 
-#define Energiamax 15 //Energía máxima que alcanza el sistema en el bucle.
+
+// ##########   DEFINE LAS CONDICIONES INICIALES PARA CADA ENERGÍA: ###############
+
+double thetaini = PI/16;
+double phiini = PI/16;
 
 //Creo el vector que tendrá las coordenadas: [theta, phi, momento de theta, momento de phi]
 
@@ -172,8 +176,8 @@ int main(void)
         FILE *posicionestxt = fopen(fname_posiciones, "w");
 
         // Condiciones iniciales
-        y[0]=0.1; // Ángulo theta
-        y[1]=0.1;  // Ángulo phi
+        y[0]=thetaini; // Ángulo theta
+        y[1]=phiini;  // Ángulo phi
 
         double arg = E - 2*g*(1-cos(y[0])) - g*(1-cos(y[1]));
         if (arg < 0) {
@@ -205,6 +209,8 @@ int main(void)
         fclose(momentostxt);
         fclose(hamiltonianotxt);
         fclose(posicionestxt);
+        printf("Una energía más hecha :D\n");
+        fflush(stdout);
     }
 
     fclose(pendulotxt);
