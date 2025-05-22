@@ -80,7 +80,7 @@ double dmtheta(double theta, double phi, double mtheta, double mphi)
     double c = cos(theta-phi);
     double s = sin(theta-phi);
     double d = 2.0 - c*c;
-    double aux=s/(d*d)*(2.0*mtheta*mphi*c - c*c*mtheta*mphi - (mtheta*mtheta + 2.0*mphi*mphi))-2.0*g*sin(theta);
+    double aux=s/(d*d)*(2.0*mtheta*mphi + c*c*mtheta*mphi - c*(mtheta*mtheta + 2.0*mphi*mphi))-2.0*g*sin(theta);
     return aux;
 
 }
@@ -90,7 +90,7 @@ double dmphi(double theta, double phi, double mtheta, double mphi)
     double c = cos(theta-phi);
     double s = sin(theta-phi);
     double d = 2.0 - c*c;
-    double aux = -s/(d*d)*(2.0*mtheta*mphi*c - c*c*mtheta*mphi - (mtheta*mtheta + 2.0*mphi*mphi))-g*sin(phi);
+    double aux = -s/(d*d)*(2.0*mtheta*mphi + c*c*mtheta*mphi - c*(mtheta*mtheta + 2.0*mphi*mphi))-g*sin(phi);
     return aux;
 }
 
