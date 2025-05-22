@@ -16,7 +16,7 @@ Este es un programa que hace un pendulo doble y exporta los datos de los angulos
 #define g 9.81
 #define PI 3.14159265
 #define T_TOTAL 60 //tiempo total.
-#define h 0.01 //paso temporal
+#define h 0.001 //paso temporal
 
 //Los parámetros del pendulo (según el voluntario son =1 para simplifcar el problema)
 
@@ -24,7 +24,9 @@ Este es un programa que hace un pendulo doble y exporta los datos de los angulos
 #define m2 1.0 // masa del segundo pendulo
 #define l1 1.0 // longitud del primer pendulo
 #define l2 1.0 // longitud del segundo pendulo
-#define E 3.0 //Energía total del sistema.
+#define E 1.0 //Energía total del sistema.
+
+#define Energiamax 15 //Energía máxima que alcanza el sistema en el bucle.
 
 //Creo el vector que tendrá las coordenadas: [theta, phi, momento de theta, momento de phi]
 
@@ -33,15 +35,15 @@ double y[4];
 
 //Creo la función que calcula el hamiltoniano.
 
-void hamiltoniano(double vector[4], FILE *file)
+void hamiltoniano(double y[4], FILE *file)
 {
+
     double H=0.0;
-    double aux1 = 2-cos(y[0]-y[1])*cos(y[0]-y[1]);
-    double auxt = y[2]-y[3]*cos(y[0]-y[1]);
-    double auxp = 2*y[3]-y[2]*cos(y[0]-y[1]);
+    double c = cos(y[0]-y[1]);
+    double dtheta1 = 1/(2-c*c)*(y[2]-y[3]*c);
+    double dphi1 = 1/(2-c*c)*(2*y[3]-y[2]*c);
 
-    H = 1.0/aux1/aux1*(auxt*auxt+1/2*auxp*auxp+auxt*auxp*cos(y[0]-y[1]))+g*(3-2*cos(y[0])-cos(y[1]));
-
+    H= dtheta1*dtheta1 +0.5*dphi1*dphi1 + dtheta1*dphi1*c+2*g*(1-cos(y[0]))+g*(1-cos(y[1]));
     fprintf(file, "%lf\n", H);
 
 }
@@ -58,38 +60,39 @@ void hamiltoniano(double vector[4], FILE *file)
 
 double dtheta (double theta, double phi, double mtheta, double mphi)
 {
-    double aux=0.0;
-    aux = 1/(2-cos(theta - phi)*cos(theta-phi))*(mtheta-mphi);
+    double c = cos(theta-phi);
+    double d = 2.0 - c*c; 
+    double aux= 1.0/d*(mtheta-mphi*c);
     return aux;
 }
 
 double dphi(double theta, double phi, double mtheta, double mphi)
 {
 
-    double aux=0.0;
-    aux = 1/(2-cos(theta - phi)*cos(theta-phi))*(2*mphi-mtheta*cos(theta-phi));
+    double c = cos(theta-phi);
+    double d = 2.0 - c*c;
+    double aux= 1.0/d*(2.0*mphi-mtheta*c);
     return aux;
 }
 
 double dmtheta(double theta, double phi, double mtheta, double mphi)
 {
-    double aux=0.0;
     double c = cos(theta-phi);
-    aux=sin(theta-phi)*(1/(c*c))*(mtheta*mphi*(2+c*c)-(mtheta*mtheta*c+2*mphi*mphi*c)) - 2*g*sin(theta);
+    double s = sin(theta-phi);
+    double d = 2.0 - c*c;
+    double aux=s/(d*d)*(2.0*mtheta*mphi*c - c*c*mtheta*mphi - (mtheta*mtheta + 2.0*mphi*mphi))-2.0*g*sin(theta);
     return aux;
 
 }
 
 double dmphi(double theta, double phi, double mtheta, double mphi)
 {
-
-    double aux=0.0;
     double c = cos(theta-phi);
-    aux=sin(phi-theta)*(1/(c*c))*(mtheta*mphi*(2+c*c)-(mtheta*mtheta*c+2*mphi*mphi*c)) - g*sin(theta);
+    double s = sin(theta-phi);
+    double d = 2.0 - c*c;
+    double aux = -s/(d*d)*(2.0*mtheta*mphi*c - c*c*mtheta*mphi - (mtheta*mtheta + 2.0*mphi*mphi))-g*sin(phi);
     return aux;
-
 }
-
 
 /* ###################### RUNGE KUTTA ###################
 
@@ -104,37 +107,32 @@ void rungekutta (double vector[4])
 {
 
     double k[4][4];
+    //El primer indice indica la ecuación y el segundo el k.
 
-    //Primero evaluamos k1, que es el paso*funcion.
+    
+    //Calculamos k1
+    k[0][0] = h*dtheta(vector[0], vector[1], vector[2], vector[3]);
+    k[1][0] = h*dphi(vector[0], vector[1], vector[2], vector[3]);
+    k[2][0] = h*dmtheta(vector[0], vector[1], vector[2], vector[3]);
+    k[3][0] = h*dmphi(vector[0], vector[1], vector[2], vector[3]);
 
-    k[0][0]=h*dtheta(vector[0], vector[1], vector[2], vector[3]);
-    k[0][1]=h*dphi(vector[0], vector[1], vector[2], vector[3]);
-    k[0][2]=h*dmtheta(vector[0], vector[1], vector[2], vector[3]);
-    k[0][3]=h*dmphi(vector[0], vector[1], vector[2], vector[3]);
+    //Calculamos k2
+    k[0][1] = h*dtheta(vector[0]+k[0][0]*0.5, vector[1]+k[1][0]*0.5, vector[2]+k[2][0]*0.5, vector[3]+k[3][0]*0.5);
+    k[1][1] = h*dphi(vector[0]+k[0][0]*0.5, vector[1]+k[1][0]*0.5, vector[2]+k[2][0]*0.5, vector[3]+k[3][0]*0.5);
+    k[2][1] = h*dmtheta(vector[0]+k[0][0]*0.5, vector[1]+k[1][0]*0.5, vector[2]+k[2][0]*0.5, vector[3]+k[3][0]*0.5);
+    k[3][1] = h*dmphi(vector[0]+k[0][0]*0.5, vector[1]+k[1][0]*0.5, vector[2]+k[2][0]*0.5, vector[3]+k[3][0]*0.5);
 
-    //Ahora calculo k2.
+    //Calculamos k3
+    k[0][2] = h*dtheta(vector[0]+k[0][1]*0.5, vector[1]+k[1][1]*0.5, vector[2]+k[2][1]*0.5, vector[3]+k[3][1]*0.5);
+    k[1][2] = h*dphi(vector[0]+k[0][1]*0.5, vector[1]+k[1][1]*0.5, vector[2]+k[2][1]*0.5, vector[3]+k[3][1]*0.5);
+    k[2][2] = h*dmtheta(vector[0]+k[0][1]*0.5, vector[1]+k[1][1]*0.5, vector[2]+k[2][1]*0.5, vector[3]+k[3][1]*0.5);
+    k[3][2] = h*dmphi(vector[0]+k[0][1]*0.5, vector[1]+k[1][1]*0.5, vector[2]+k[2][1]*0.5, vector[3]+k[3][1]*0.5);
 
-    k[1][0]=h*dtheta(vector[0]+k[0][0]/2, vector[1]+k[0][1]/2, vector[2]+k[0][2]/2, vector[3]+k[0][3]/2);
-    k[1][1]=h*dphi(vector[0]+k[0][0]/2, vector[1]+k[0][1]/2, vector[2]+k[0][2]/2, vector[3]+k[0][3]/2);
-    k[1][2]=h*dmtheta(vector[0]+k[0][0]/2, vector[1]+k[0][1]/2, vector[2]+k[0][2]/2, vector[3]+k[0][3]/2);
-    k[1][3]=h*dmphi(vector[0]+k[0][0]/2, vector[1]+k[0][1]/2, vector[2]+k[0][2]/2, vector[3]+k[0][3]/2);
-
-    //Ahora calculo k3.
-
-
-    k[2][0]=h*dtheta(vector[0]+k[1][0]/2, vector[1]+k[1][1]/2, vector[2]+k[1][2]/2, vector[3]+k[1][3]/2);
-    k[2][1]=h*dphi(vector[0]+k[1][0]/2, vector[1]+k[1][1]/2, vector[2]+k[1][2]/2, vector[3]+k[1][3]/2);
-    k[2][2]=h*dmtheta(vector[0]+k[1][0]/2, vector[1]+k[1][1]/2, vector[2]+k[1][2]/2, vector[3]+k[1][3]/2);
-    k[2][3]=h*dmphi(vector[0]+k[1][0]/2, vector[1]+k[1][1]/2, vector[2]+k[1][2]/2, vector[3]+k[1][3]/2);
-
-    //Por último, k4.
-
-    k[3][0]=h*dtheta(vector[0]+k[2][0], vector[1]+k[2][1], vector[2]+k[2][2], vector[3]+k[2][3]);
-    k[3][1]=h*dphi(vector[0]+k[2][0], vector[1]+k[2][1], vector[2]+k[2][2], vector[3]+k[2][3]);
-    k[3][2]=h*dmtheta(vector[0]+k[2][0], vector[1]+k[2][1], vector[2]+k[2][2], vector[3]+k[2][3]);
-    k[3][3]=h*dmphi(vector[0]+k[2][0], vector[1]+k[2][1], vector[2]+k[2][2], vector[3]+k[2][3]);
-
-    //actualizamos el vector inicial
+    //Calculamos k4
+    k[0][3] = h*dtheta(vector[0]+k[0][2], vector[1]+k[1][2], vector[2]+k[2][2], vector[3]+k[3][2]);
+    k[1][3] = h*dphi(vector[0]+k[0][2], vector[1]+k[1][2], vector[2]+k[2][2], vector[3]+k[3][2]);
+    k[2][3] = h*dmtheta(vector[0]+k[0][2], vector[1]+k[1][2], vector[2]+k[2][2], vector[3]+k[3][2]);
+    k[3][3] = h*dmphi(vector[0]+k[0][2], vector[1]+k[1][2], vector[2]+k[2][2], vector[3]+k[3][2]);
 
     for(int i=0; i<4; ++i)
     {
@@ -153,35 +151,67 @@ int main(void)
     FILE *angulostxt = fopen("angulos.txt", "w"); 
     FILE *momentostxt = fopen("momentos.txt", "w");
     FILE *hamiltonianotxt = fopen("hamiltoniano.txt", "w");
+    FILE *posicionestxt = fopen("posiciones.txt", "w");
     FILE *pendulotxt = fopen("pendulo.txt", "w");
+    
+    FILE *angulosenergiastxt = fopen("angulosenergias.txt", "w");
+    FILE *energiasdistintastxt = fopen("energiasdistintas.txt", "w");
+    
 
-    if (angulostxt == NULL || momentostxt == NULL || hamiltonianotxt == NULL || pendulotxt == NULL) {
+    if (angulostxt == NULL || energiasdistintastxt == NULL || momentostxt == NULL || hamiltonianotxt == NULL || pendulotxt == NULL || posicionestxt == NULL || angulosenergiastxt == NULL) {
         printf("Error al abrir el archivo.\n");
         return 1;
     }
+
+    //El vector pos[4] indica las posiciones en el eje X,Y de la particula 1 y la particula 2. siendo [x1, y1, x2, y2].
+
+    double pos[4];
 
     //Establecemos las condiciones iniciales. Tenemos 4 parámetros libres pero lo reducimos a 2: los ángulos iniciales.
     // Para ello asumimos phi'=0, por tanto calculamos su momento -> obtenemos mphi.
     //También tenemos que la energía tiene un valor constante, que usamos para sacar el otro valor -> obtenemos mtheta.
 
-    y[0]=0.3; //Ángulo theta.
-    y[1]=0.4; //Ángulo phi.
-    y[2]=2*sqrt(E-2*g*(1-cos(y[0])-(1-cos(y[1])))); //Momento theta.
-    y[3]=y[2]/2*cos(y[0]-y[1]); //Momento phi.
+    y[0]=PI/16; //Ángulo theta.
+    y[1]=PI/16; //Ángulo phi.
+    double arg=E-2*g*(1-cos(y[0]))-g*(1-cos(y[1]));
+    if (arg<0)
+    {
+        printf("El argumento es negativo, no podemos hacer eso");
+        return 1;
+    }
+    y[2]=2*sqrt(arg); //Momento theta.
+    y[3]=y[2]*0.5*cos(y[0]-y[1]); //Momento phi.
 
     //Hago el bucle principal.
 
     int numpasos = T_TOTAL/h;
 
+    //Condiciones iniciales;
+
+    //y[0]=0.25; //Ángulo theta.
+    //y[1]=0.3; //Ángulo phi.
+
+
+    /* SI QUEREMOS SOLO EJECUTAR EL PROGRAMA 1 VEZ*/
+    
     for(int i=0; i<numpasos; i++)
     {
         rungekutta(y);
         hamiltoniano(y, hamiltonianotxt);
-        fprintf(angulostxt, "%lf, %lf\n", y[0], y[1]);
-        fprintf(momentostxt, "%lf, %lf\n", y[2], y[3]);
+        fprintf(angulostxt, "%lf %lf\n", y[0], y[1]);
+        fprintf(momentostxt, "%lf %lf\n", y[2], y[3]);
+
+        //Calculo las posiciones para la animación. Para ello asumo una caja de 6x6, en cuyo centro se encuentra el pendulo.
+
+        pos[0]= 3 + sin(y[0]);
+        pos[1]= 3 - cos(y[0]);
+        pos[2]= pos[0] + sin(y[1]);
+        pos[3]= pos[1] - cos(y[1]);
+
+        fprintf(posicionestxt, "%lf %lf %lf %lf\n", pos[0], pos[1], pos[2], pos[3]);
 
     }
-
+    
 
 
     fclose(angulostxt);
