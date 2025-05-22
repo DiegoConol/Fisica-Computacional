@@ -15,8 +15,8 @@ Este es un programa que hace un pendulo doble y exporta los datos de los angulos
 
 #define g 9.81
 #define PI 3.14159265
-#define T_TOTAL 60 //tiempo total.
-#define h 0.001 //paso temporal
+#define T_TOTAL 30 //tiempo total.
+#define h 0.01 //paso temporal
 
 //Los parámetros del pendulo (según el voluntario son =1 para simplifcar el problema)
 
@@ -24,9 +24,13 @@ Este es un programa que hace un pendulo doble y exporta los datos de los angulos
 #define m2 1.0 // masa del segundo pendulo
 #define l1 1.0 // longitud del primer pendulo
 #define l2 1.0 // longitud del segundo pendulo
-#define E 1.0 //Energía total del sistema.
+#define E 10.0 //Energía total del sistema.
 
-#define Energiamax 15 //Energía máxima que alcanza el sistema en el bucle.
+//CONDICIONES INCIALES
+
+double thetaini = 0.7;  //Ángulo inicial en theta
+double phiini = 0.8;    //Ángulo inicial en phi
+
 
 //Creo el vector que tendrá las coordenadas: [theta, phi, momento de theta, momento de phi]
 
@@ -171,8 +175,8 @@ int main(void)
     // Para ello asumimos phi'=0, por tanto calculamos su momento -> obtenemos mphi.
     //También tenemos que la energía tiene un valor constante, que usamos para sacar el otro valor -> obtenemos mtheta.
 
-    y[0]=PI/16; //Ángulo theta.
-    y[1]=PI/16; //Ángulo phi.
+    y[0]=thetaini; //Ángulo theta.
+    y[1]=phiini; //Ángulo phi.
     double arg=E-2*g*(1-cos(y[0]))-g*(1-cos(y[1]));
     if (arg<0)
     {

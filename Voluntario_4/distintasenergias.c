@@ -14,7 +14,7 @@ Este es un programa que hace un pendulo doble y exporta los datos de los angulos
 
 #define g 9.81
 #define PI 3.14159265
-#define T_TOTAL 45 //tiempo total. (No recomendable poner más de 30, sino se raya. Poner 30 o bajar el paso.)
+#define T_TOTAL 48 //tiempo total. (No recomendable poner más de 30, sino se raya. Poner 30 o bajar el paso.)
 #define h 0.0001 //paso temporal
 
 //Los parámetros del pendulo (según el voluntario son =1 para simplifcar el problema)
@@ -155,6 +155,10 @@ int main(void)
 
     //El vector pos[4] indica las posiciones en el eje X,Y de la particula 1 y la particula 2. siendo [x1, y1, x2, y2].
     double pos[4];
+
+    //El vector vel[2] indica las velocidades de los ángulos [theta', phi']
+    double vel[2];
+
     int numpasos = T_TOTAL/h;
 
     // Condiciones iniciales
@@ -163,17 +167,24 @@ int main(void)
 
     for (int e = 0; e < num_energias; ++e) {
         double E = energias[e];
-        char fname_angulos[64], fname_momentos[64], fname_hamiltoniano[64], fname_posiciones[64];
+        char fname_angulos[64], fname_momentos[64], fname_hamiltoniano[64], fname_posiciones[64], fname_fasetheta[64], fname_fasephi[64];
 
         snprintf(fname_angulos, sizeof(fname_angulos), "angulos_%.1f.txt", E);
         snprintf(fname_momentos, sizeof(fname_momentos), "momentos_%.1f.txt", E);
         snprintf(fname_hamiltoniano, sizeof(fname_hamiltoniano), "hamiltoniano_%.1f.txt", E);
         snprintf(fname_posiciones, sizeof(fname_posiciones), "posiciones_%.1f.txt", E);
+        snprintf(fname_fasetheta, sizeof(fname_fasetheta), "espaciofasicotheta_%.1f.txt", E);
+        snprintf(fname_fasephi, sizeof(fname_fasephi), "espaciofasicophi_%.1f.txt", E);
+
+
 
         FILE *angulostxt = fopen(fname_angulos, "w");
         FILE *momentostxt = fopen(fname_momentos, "w");
         FILE *hamiltonianotxt = fopen(fname_hamiltoniano, "w");
         FILE *posicionestxt = fopen(fname_posiciones, "w");
+        FILE *fasetheta = fopen(fname_fasetheta, "w");
+        FILE *fasephi = fopen(fname_fasephi, "w");
+
 
         // Condiciones iniciales
         y[0]=thetaini; // Ángulo theta
@@ -203,6 +214,19 @@ int main(void)
             pos[2]= pos[0] + sin(y[1]);
             pos[3]= pos[1] - cos(y[1]);
             fprintf(posicionestxt, "%lf %lf %lf %lf\n", pos[0], pos[1], pos[2], pos[3]);
+
+
+            //Calculo las velocidades angulares para el espacio fásico.
+
+
+            vel[0]=1.0/(2-cos(y[0]-y[1])*cos(y[0]-y[1]))*(y[2]-y[3]*cos(y[0]-y[1]));
+            vel[1]=1.0/(2-cos(y[0]-y[1])*cos(y[0]-y[1]))*(2*y[3]-y[2]*cos(y[0]-y[1]));
+
+            fprintf(fasetheta, "%lf %lf\n", y[0], vel[0]);
+            fprintf(fasephi, "%lf %lf\n", y[1], vel[1]);
+
+
+
         }
 
         fclose(angulostxt);
