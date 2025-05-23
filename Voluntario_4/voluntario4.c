@@ -15,7 +15,7 @@ Este es un programa que hace un pendulo doble y exporta los datos de los angulos
 
 #define g 9.81
 #define PI 3.14159265
-#define T_TOTAL 30 //tiempo total.
+#define T_TOTAL 10 //tiempo total.
 #define h 0.01 //paso temporal
 
 //Los parámetros del pendulo (según el voluntario son =1 para simplifcar el problema)
@@ -24,11 +24,11 @@ Este es un programa que hace un pendulo doble y exporta los datos de los angulos
 #define m2 1.0 // masa del segundo pendulo
 #define l1 1.0 // longitud del primer pendulo
 #define l2 1.0 // longitud del segundo pendulo
-#define E 10.0 //Energía total del sistema.
+#define E 50.0 //Energía total del sistema.
 
 //CONDICIONES INCIALES
 
-double thetaini = 0.7;  //Ángulo inicial en theta
+double thetaini = 1.7;  //Ángulo inicial en theta
 double phiini = 0.8;    //Ángulo inicial en phi
 
 
@@ -81,21 +81,43 @@ double dphi(double theta, double phi, double mtheta, double mphi)
 
 double dmtheta(double theta, double phi, double mtheta, double mphi)
 {
+    /*
     double c = cos(theta-phi);
     double s = sin(theta-phi);
     double d = 2.0 - c*c;
     double aux=s/(d*d)*(2.0*mtheta*mphi + c*c*mtheta*mphi - c*(mtheta*mtheta + 2.0*mphi*mphi))-2.0*g*sin(theta);
     return aux;
+    */
+
+    double c = cos(theta-phi);
+    double s = sin(theta-phi);
+    double d = 2.0 - c*c;
+    
+    // Término que viene de ∂H/∂θ
+    double term1 = s * c / (d*d) * (mtheta - mphi*c) * (2*mphi - mtheta*c);
+    double term2 = -2.0*g*sin(theta);
+    
+    return term1 + term2;
 
 }
 
 double dmphi(double theta, double phi, double mtheta, double mphi)
-{
+{   /*
     double c = cos(theta-phi);
     double s = sin(theta-phi);
     double d = 2.0 - c*c;
     double aux = -s/(d*d)*(2.0*mtheta*mphi + c*c*mtheta*mphi - c*(mtheta*mtheta + 2.0*mphi*mphi))-g*sin(phi);
     return aux;
+    */
+    double c = cos(theta-phi);
+    double s = sin(theta-phi);
+    double d = 2.0 - c*c;
+    
+    // Término que viene de ∂H/∂ψ  
+    double term1 = -s * c / (d*d) * (mtheta - mphi*c) * (2*mphi - mtheta*c);
+    double term2 = -g*sin(phi);
+    
+    return term1 + term2;
 }
 
 /* ###################### RUNGE KUTTA ###################
@@ -138,6 +160,35 @@ void rungekutta (double vector[4])
     k[2][3] = h*dmtheta(vector[0]+k[0][2], vector[1]+k[1][2], vector[2]+k[2][2], vector[3]+k[3][2]);
     k[3][3] = h*dmphi(vector[0]+k[0][2], vector[1]+k[1][2], vector[2]+k[2][2], vector[3]+k[3][2]);
 
+    
+    /*
+    //k1
+    k[0][0] = h*dtheta(vector[0], vector[1], vector[2], vector[3]);
+    k[0][1] = h*dphi(vector[0], vector[1], vector[2], vector[3]);
+    k[0][2] = h*dmtheta(vector[0], vector[1], vector[2], vector[3]);
+    k[0][3] = h*dmphi(vector[0], vector[1], vector[2], vector[3]);
+
+    //k2
+    k[1][0]= h*dtheta(vector[0]+k[0][0]/2, vector[1]+k[0][1]/2, vector[2]+k[0][2]/2, vector[3]+k[0][3]/2);
+    k[1][1]= h*dphi(vector[0]+k[0][0]/2, vector[1]+k[0][1]/2, vector[2]+k[0][2]/2, vector[3]+k[0][3]/2);
+    k[1][2]= h*dmtheta(vector[0]+k[0][0]/2, vector[1]+k[0][1]/2, vector[2]+k[0][2]/2, vector[3]+k[0][3]/2);
+    k[1][3]= h*dmphi(vector[0]+k[0][0]/2, vector[1]+k[0][1]/2, vector[2]+k[0][2]/2, vector[3]+k[0][3]/2);
+
+    //k3
+    k[2][0]= h*dtheta(vector[0]+k[1][0]/2, vector[1]+k[1][1]/2, vector[2]+k[1][2]/2, vector[3]+k[1][3]/2);
+    k[2][1]= h*dtheta(vector[0]+k[1][0]/2, vector[1]+k[1][1]/2, vector[2]+k[1][2]/2, vector[3]+k[1][3]/2);
+    k[2][2]= h*dtheta(vector[0]+k[1][0]/2, vector[1]+k[1][1]/2, vector[2]+k[1][2]/2, vector[3]+k[1][3]/2);
+    k[2][3]= h*dtheta(vector[0]+k[1][0]/2, vector[1]+k[1][1]/2, vector[2]+k[1][2]/2, vector[3]+k[1][3]/2);
+
+    //k4
+    k[3][0]= h*dtheta(vector[0]+k[2][0], vector[1]+k[2][1], vector[2]+k[2][2], vector[3]+k[2][3]);
+    k[3][1]= h*dtheta(vector[0]+k[2][0], vector[1]+k[2][1], vector[2]+k[2][2], vector[3]+k[2][3]);
+    k[3][2]= h*dtheta(vector[0]+k[2][0], vector[1]+k[2][1], vector[2]+k[2][2], vector[3]+k[2][3]);
+    k[3][3]= h*dtheta(vector[0]+k[2][0], vector[1]+k[2][1], vector[2]+k[2][2], vector[3]+k[2][3]);
+
+    */
+
+
     for(int i=0; i<4; ++i)
     {
         vector[i]+= 1.0/6.0*(k[i][0]+2*k[i][1]+2*k[i][2]+k[i][3]);
@@ -157,12 +208,9 @@ int main(void)
     FILE *hamiltonianotxt = fopen("hamiltoniano.txt", "w");
     FILE *posicionestxt = fopen("posiciones.txt", "w");
     FILE *pendulotxt = fopen("pendulo.txt", "w");
-    
-    FILE *angulosenergiastxt = fopen("angulosenergias.txt", "w");
-    FILE *energiasdistintastxt = fopen("energiasdistintas.txt", "w");
-    
 
-    if (angulostxt == NULL || energiasdistintastxt == NULL || momentostxt == NULL || hamiltonianotxt == NULL || pendulotxt == NULL || posicionestxt == NULL || angulosenergiastxt == NULL) {
+
+    if (angulostxt == NULL ||  momentostxt == NULL || hamiltonianotxt == NULL || pendulotxt == NULL || posicionestxt == NULL) {
         printf("Error al abrir el archivo.\n");
         return 1;
     }
