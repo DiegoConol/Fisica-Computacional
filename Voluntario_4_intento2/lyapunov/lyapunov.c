@@ -14,22 +14,36 @@ Este es el segundo intento para el pendulo doble. Contiene lo básico.
 
 #define g 9.81
 #define PI 3.14159265
-#define h 0.001         //paso de tiempo
+#define h 0.01         //paso de tiempo
 #define T_Total 60      //tiempo total de simulacion
+
+#define Tmax 600
+#define incremento 10
 
 //Condiciones iniciales:
 
 double thetaini = 0.1;
 double phiini = 0.2;
 
+//Perturbaciones de Lyapunov:
+
+double difftheta = 0.0001;
+double diffphi = 0.0001;
+
 
 //El vector que usaré para guardar las coordenadas del péndulo será [theta, phi, momento theta, momento phi], con theta el primer ángulo.
 
 double y[4];
 
+double l[4]; //Vector del segundo péndulo.
+
 double pos[4]; //Tendrá las coordenadas x e y de ambos pendulos.
 double vel[2]; //Contiene las theta' y phi'.
 
+double posl[4];
+double vell[2];
+
+double diff[4]; //Diferencia en la trayectoria de cada pendulo.
 
 // ################### ECUACIONES DE MOVIMIENTO ######################
 
@@ -129,21 +143,30 @@ int main(void)
     double energias[] = {1.0, 3.0, 5.0, 10.0, 15.0};
     int num_energias = sizeof(energias)/sizeof(energias[0]);
 
+    
+
     for (int e=0; e<num_energias; e++)
     {
 
-        
+        for (int tiempo = T_Total; tiempo< Tmax; tiempo = tiempo + incremento)
+        { 
         double E=energias[e];
 
         //Creo los ficheros para cada energía.
         
         char fname_posiciones[64], fname_angulos[64], fname_momentos[64], fname_fasetheta[64], fname_fasephi[64];
 
-        snprintf(fname_angulos,     sizeof(fname_angulos),      "posiciones/angulos_%.1f.txt", E);
-        snprintf(fname_posiciones,  sizeof(fname_posiciones),   "posiciones/posiciones_%.1f.txt",E);
-        snprintf(fname_fasetheta,   sizeof(fname_fasetheta),    "espaciofase/fasetheta_%.1f.txt", E);
-        snprintf(fname_fasephi,     sizeof(fname_fasephi),      "espaciofase/fasephi_%.1f.txt", E);
-        snprintf(fname_momentos,    sizeof(fname_momentos),     "espaciofase/momentos_%.1f.txt", E);
+        //Para lyapunov:
+
+        char fname_diferencia[64], fname_lyapunov[64];
+
+        snprintf(fname_angulos,     sizeof(fname_angulos),      "posiciones/angulos_%.1f_%d.txt", E, tiempo);
+        snprintf(fname_posiciones,  sizeof(fname_posiciones),   "posiciones/posiciones_%.1f_%d.txt",E, tiempo);
+        snprintf(fname_fasetheta,   sizeof(fname_fasetheta),    "espaciofase/fasetheta_%.1f_%d.txt", E, tiempo);
+        snprintf(fname_fasephi,     sizeof(fname_fasephi),      "espaciofase/fasephi_%.1f_%d.txt", E, tiempo);
+        snprintf(fname_momentos,    sizeof(fname_momentos),     "espaciofase/momentos_%.1f_%d.txt", E, tiempo);
+        snprintf(fname_diferencia,  sizeof(fname_diferencia),   "lyapunovdatos/diferenciaangulos_%.1f_%d.txt", E, tiempo);
+        snprintf(fname_lyapunov,     sizeof(fname_lyapunov),    "lyapunovcoefi/lyapunov_%.1f.txt", E);
 
 
         FILE *angulostxt =      fopen(fname_angulos, "w");
@@ -151,10 +174,12 @@ int main(void)
         FILE *fasetheta =       fopen(fname_fasetheta, "w");
         FILE *fasephi =         fopen(fname_fasephi, "w");
         FILE *momentostxt =     fopen(fname_momentos, "w");
+        FILE *diferenciatxt =   fopen(fname_diferencia, "w");
+        FILE *lyapunovtxt =     fopen(fname_lyapunov, "w");
 
         //Comprobamos que lo abre:
 
-        if (!angulostxt || !posicionestxt || !fasetheta || !fasephi || !momentostxt) {
+        if (!angulostxt || !posicionestxt || !fasetheta || !fasephi || !momentostxt || !diferenciatxt) {
         printf("Error al abrir uno de los archivos para E=%.1f\n", E);
         // Cierra los que sí se abrieron
         if (angulostxt) fclose(angulostxt);
@@ -171,6 +196,12 @@ int main(void)
         y[0] = thetaini;
         y[1] = phiini;
 
+        l[0] = thetaini - difftheta;
+        l[1] = phiini - diffphi;
+        
+
+
+
         //Comprobamos que se puede para esa energía que phi' = 0.
 
         double arg = E -2*g*(1-cos(y[0]))-g*(1-cos(y[1]));
@@ -182,11 +213,39 @@ int main(void)
         fclose(fasetheta);
         fclose(fasephi);
         fclose(momentostxt);
+        fclose(diferenciatxt);
+        continue;
+        }
+        
+        double arg2 = E -2*g*(1-cos(l[0]))-g*(1-cos(l[1]));
+        if(arg2 < 0)
+        { 
+        printf("El argumento es negativo, no es físicamente posible");
+        fclose(angulostxt);
+        fclose(posicionestxt);
+        fclose(fasetheta);
+        fclose(fasephi);
+        fclose(momentostxt);
+        fclose(diferenciatxt);
         continue;
         }
         
         y[2] = 2*sqrt(arg);
         y[3] = sqrt(arg)*cos(y[0]-y[1]);
+
+        l[2] = 2*sqrt(arg2);
+        l[3] = sqrt(arg2)*cos(l[0]-l[1]);
+        
+        diff[0] = y[0]-l[0];
+        diff[1] = y[1]-l[1];
+        diff[2] = y[2]-l[2];
+        diff[3] = y[3]-l[3];
+
+        double diferenciainicial = sqrt(pow(diff[0],2) + pow(diff[1],2) +pow(diff[2],2) +pow(diff[3],2));
+        double diferenciatotal = diferenciainicial;
+        double lyapunov = 0.0;
+
+        fprintf(diferenciatxt, "%lf\n", diferenciainicial);
 
         //Voy a poner al péndulo en una caja 3x3 para que nunca choque con ella.
 
@@ -195,10 +254,23 @@ int main(void)
         pos[2]= pos[0] + sin(y[1]);
         pos[3]= pos[1] - cos(y[1]);
 
+        
+
         //Calculo las velocidades iniciales.
 
         vel[0] = 1/(2-pow(cos(y[0]-y[1]),2))*(y[2]-y[3]*cos(y[0]-y[1]));
         vel[1] = 1/(2-pow(cos(y[0]-y[1]),2))*(2*y[3]-y[2]*cos(y[0]-y[1]));
+        
+
+        /* Y LO MISMO PARA EL OTRO PENDULO
+        posl[0]= 3 + sin(l[0]);
+        posl[1]= 3 - cos(l[0]);
+        posl[2]= posl[0] + sin(l[1]);
+        posl[3]= posl[1] - cos(l[1]);
+        vell[0] = 1/(2-pow(cos(l[0]-l[1]),2))*(l[2]-l[3]*cos(l[0]-l[1]));
+        vell[1] = 1/(2-pow(cos(l[0]-l[1]),2))*(2*l[3]-l[2]*cos(l[0]-l[1]));
+        */
+        
        
 
         //Ponemos las condiciones iniciales en cada fichero:
@@ -216,20 +288,41 @@ int main(void)
         while(t<T_Total)
         {
             rungekutta(y);
+            rungekutta(l);
 
-            vel[0] = 1/(2-pow(cos(y[0]-y[1]),2))*(y[2]-y[3]*cos(y[0]-y[1]));
+    
+
+            /*vel[0] = 1/(2-pow(cos(y[0]-y[1]),2))*(y[2]-y[3]*cos(y[0]-y[1]));
             vel[1] = 1/(2-pow(cos(y[0]-y[1]),2))*(2*y[3]-y[2]*cos(y[0]-y[1]));
 
             pos[0]= 3 + sin(y[0]);
             pos[1]= 3 - cos(y[0]);
             pos[2]= pos[0] + sin(y[1]);
             pos[3]= pos[1] - cos(y[1]);
+            */
+
+
+            /* Y lo mismo para el otro pendulo
+            posl[0]= 3 + sin(l[0]);
+            posl[1]= 3 - cos(l[0]);
+            posl[2]= posl[0] + sin(l[1]);
+            posl[3]= posl[1] - cos(l[1]);
+            vell[0] = 1/(2-pow(cos(l[0]-l[1]),2))*(l[2]-l[3]*cos(l[0]-l[1]));
+            vell[1] = 1/(2-pow(cos(l[0]-l[1]),2))*(2*l[3]-l[2]*cos(l[0]-l[1]));
+            */
 
             fprintf(angulostxt, "%lf %lf\n", y[0], y[1]);
-            fprintf(posicionestxt, "%lf %lf %lf %lf\n", pos[0], pos[1], pos[2], pos[3]);
             fprintf(momentostxt, "%lf %lf\n", y[2], y[3]);
+
+            /*
+            fprintf(posicionestxt, "%lf %lf %lf %lf\n", pos[0], pos[1], pos[2], pos[3]);
+            
             fprintf(fasetheta, "%lf %lf\n", y[0], vel[0]);
             fprintf(fasephi, "%lf %lf\n", y[1], vel[1]);
+            */
+
+            diferenciatotal += sqrt(pow(diff[0],2) + pow(diff[1],2) +pow(diff[2],2) +pow(diff[3],2));
+            lyapunov += diferenciatotal/diferenciainicial;
 
             t=t+h;
         }
@@ -239,10 +332,15 @@ int main(void)
         fclose(fasephi);
         fclose(momentostxt);
 
-        printf("He terminado una energía\n");
+        
         fflush(stdout);
+        
+        lyapunov = lyapunov/tiempo;
+        fprintf(lyapunovtxt,"%lf\n", lyapunov);
 
+    } //termina el bucle del tiempo
 
-    }
+    printf("He terminado una energía\n");
+    } //termina el bucle de las energías
 
 }

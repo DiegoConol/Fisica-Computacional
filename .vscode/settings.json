@@ -4,6 +4,7 @@
         "vector": "c",
         "numbers": "c",
         "stdio.h": "c",
-        "random": "c"
+        "random": "c",
+        "cmath": "c"
     }
 }
