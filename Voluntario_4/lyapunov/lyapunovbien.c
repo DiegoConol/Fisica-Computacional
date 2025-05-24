@@ -14,8 +14,8 @@ Este es un programa que hace un pendulo doble y exporta los datos de los angulos
 
 #define g 9.81
 #define PI 3.14159265
-#define T_TOTAL 600 //tiempo total. (No recomendable poner más de 30, sino se raya. Poner 30 o bajar el paso.)
-#define h 0.01 //paso temporal
+#define T_TOTAL 200 //tiempo total. (No recomendable poner más de 30, sino se raya. Poner 30 o bajar el paso.)
+#define h 0.001 //paso temporal
 
 //Los parámetros del pendulo (según el voluntario son =1 para simplifcar el problema)
 
@@ -23,6 +23,11 @@ Este es un programa que hace un pendulo doble y exporta los datos de los angulos
 #define m2 1.0 // masa del segundo pendulo
 #define l1 1.0 // longitud del primer pendulo
 #define l2 1.0 // longitud del segundo pendulo
+
+
+#define Tmax 600 //Tiempo total para el coeficiente de lyapunov
+
+
 double E = 0.0;
 
 
@@ -32,8 +37,8 @@ double thetaini = PI/16;
 double phiini = PI/16;
 
 //Diferencias en las condiciones iniciales para el segundo péndulo.
-double difftheta = 0.0;
-double diffphi = 0.0001; 
+double difftheta = 0.001;
+double diffphi = 0.001; 
 
 //Creo el vector que tendrá las coordenadas: [theta, phi, momento de theta, momento de phi]
 
@@ -101,6 +106,16 @@ double dmphi(double theta, double phi, double mtheta, double mphi)
     double d = 2.0 - c*c;
     double aux = -s/(d*d)*(2.0*mtheta*mphi + c*c*mtheta*mphi - c*(mtheta*mtheta + 2.0*mphi*mphi))-g*sin(phi);
     return aux;
+}
+
+
+double funabs(double ang1, double ang2)
+{
+    double diff = fabs(ang1 - ang2);
+    if (diff > PI) {
+        diff = 2*PI - diff;
+    }
+    return diff;
 }
 
 /* ###################### RUNGE KUTTA ###################
@@ -178,6 +193,9 @@ int main(void)
     int num_energias = sizeof(energias)/sizeof(energias[0]);
 
     for (int e = 0; e < num_energias; ++e) {
+
+        
+
         double E = energias[e];
         char fname_angulos[64], fname_lyapunov[64], fname_momentos[64], fname_hamiltoniano[64], fname_posiciones[64], fname_diffangulos[64], fname_posiciones2[64];
 
@@ -238,8 +256,8 @@ int main(void)
 
 
         //Calculo la diferencia y la pongo en el archivo.
-        diffv[0] = fabs(y[0]-l[0]);
-        diffv[1] = fabs(y[1]-l[1]);
+        diffv[0] = funabs(y[0],l[0]);
+        diffv[1] = funabs(y[1],l[1]);
         
         double ypunto[2]; // velocidad en [thetapunto, phipunto];
         double lpunto[2];
@@ -278,8 +296,8 @@ int main(void)
 
             //Calculo la diferencia de ángulos y lo printeo
 
-            diffv[0] = fabs(y[0]-l[0]);
-            diffv[1] = fabs(y[1]-l[1]);
+            diffv[0] = funabs(y[0],l[0]);
+            diffv[1] = funabs(y[1],l[1]);
             
             ypunto[0] = 1/(2-cos(y[0]-y[1])*cos(y[0]-y[1]))*(y[2]-  y[3]*cos(y[0]-y[1]));
             ypunto[1] = 1/(2-cos(y[0]-y[1])*cos(y[0]-y[1]))*(y[3]*2-y[2]*cos(y[0]-y[1]));
@@ -294,9 +312,7 @@ int main(void)
             
             diferenciatotal=sqrt(diffv[0]*diffv[0]+diffv[1]*diffv[1]+diffv[2]*diffv[2]+diffv[3]*diffv[3]);
 
-            lyapunov+= log(diferenciatotal/diferenciainicial)/T_TOTAL;
-
-            fprintf(lyapunovtxt, "%lf\n", lyapunov);
+            lyapunov+= log(diferenciatotal/diferenciainicial);
 
             fprintf(diffangulos, "%lf\n", diferenciatotal);
 
@@ -321,6 +337,10 @@ int main(void)
 
             //Calculo las velocidades angulares para el espacio fásico.
         }
+
+        lyapunov=lyapunov/T_TOTAL;
+
+        fprintf(lyapunovtxt, "%lf\n", lyapunov);
 
         fclose(angulostxt);
         fclose(momentostxt);

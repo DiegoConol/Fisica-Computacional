@@ -2,6 +2,8 @@
     "files.associations": {
         "time.h": "c",
         "vector": "c",
-        "numbers": "c"
+        "numbers": "c",
+        "stdio.h": "c",
+        "random": "c"
     }
 }
