@@ -277,10 +277,10 @@ int main(void)
 
         fprintf(angulostxt, "%lf %lf\n", y[0], y[1]);
         fprintf(posicionestxt, "%lf %lf %lf %lf\n", pos[0], pos[1], pos[2], pos[3]);
-        fprintf(momentostxt, "%lf %lf\n", y[2], y[3]);
+        /*fprintf(momentostxt, "%lf %lf\n", y[2], y[3]);
         fprintf(fasetheta, "%lf %lf\n", y[0], vel[0]);
         fprintf(fasephi, "%lf %lf\n", y[1], vel[1]);
-        
+        */
 
 
         //Condiciones iniciales listas, vamos al bucle del programa.
