@@ -27,8 +27,8 @@ double phiini = 0.2;
 
 //Perturbaciones de Lyapunov:
 
-double difftheta = 0.0001;
-double diffphi = 0.0001;
+double difftheta = 0.01;
+double diffphi = 0.01;
 
 
 //El vector que usaré para guardar las coordenadas del péndulo será [theta, phi, momento theta, momento phi], con theta el primer ángulo.
@@ -147,10 +147,14 @@ int main(void)
 
     for (int e=0; e<num_energias; e++)
     {
+        double E=energias[e];
+        char fname_lyapunov[64];
+        snprintf(fname_lyapunov,     sizeof(fname_lyapunov),    "lyapunovcoefi/lyapunov_%.1f.txt", E);
+        FILE *lyapunovtxt =     fopen(fname_lyapunov, "w");
 
         for (int tiempo = T_Total; tiempo< Tmax; tiempo = tiempo + incremento)
         { 
-        double E=energias[e];
+        
 
         //Creo los ficheros para cada energía.
         
@@ -158,35 +162,35 @@ int main(void)
 
         //Para lyapunov:
 
-        char fname_diferencia[64], fname_lyapunov[64];
+        char fname_diferencia[64];
 
         snprintf(fname_angulos,     sizeof(fname_angulos),      "posiciones/angulos_%.1f_%d.txt", E, tiempo);
         snprintf(fname_posiciones,  sizeof(fname_posiciones),   "posiciones/posiciones_%.1f_%d.txt",E, tiempo);
-        snprintf(fname_fasetheta,   sizeof(fname_fasetheta),    "espaciofase/fasetheta_%.1f_%d.txt", E, tiempo);
-        snprintf(fname_fasephi,     sizeof(fname_fasephi),      "espaciofase/fasephi_%.1f_%d.txt", E, tiempo);
-        snprintf(fname_momentos,    sizeof(fname_momentos),     "espaciofase/momentos_%.1f_%d.txt", E, tiempo);
+        //snprintf(fname_fasetheta,   sizeof(fname_fasetheta),    "espaciofase/fasetheta_%.1f_%d.txt", E, tiempo);
+        //snprintf(fname_fasephi,     sizeof(fname_fasephi),      "espaciofase/fasephi_%.1f_%d.txt", E, tiempo);
+        //snprintf(fname_momentos,    sizeof(fname_momentos),     "espaciofase/momentos_%.1f_%d.txt", E, tiempo);
         snprintf(fname_diferencia,  sizeof(fname_diferencia),   "lyapunovdatos/diferenciaangulos_%.1f_%d.txt", E, tiempo);
-        snprintf(fname_lyapunov,     sizeof(fname_lyapunov),    "lyapunovcoefi/lyapunov_%.1f.txt", E);
+        
 
 
         FILE *angulostxt =      fopen(fname_angulos, "w");
         FILE *posicionestxt =   fopen(fname_posiciones, "w");
-        FILE *fasetheta =       fopen(fname_fasetheta, "w");
+        /*FILE *fasetheta =       fopen(fname_fasetheta, "w");
         FILE *fasephi =         fopen(fname_fasephi, "w");
-        FILE *momentostxt =     fopen(fname_momentos, "w");
+        FILE *momentostxt =     fopen(fname_momentos, "w");*/
         FILE *diferenciatxt =   fopen(fname_diferencia, "w");
-        FILE *lyapunovtxt =     fopen(fname_lyapunov, "w");
+        
 
         //Comprobamos que lo abre:
 
-        if (!angulostxt || !posicionestxt || !fasetheta || !fasephi || !momentostxt || !diferenciatxt) {
+        if (!angulostxt || !posicionestxt || /*!fasetheta || !fasephi || !momentostxt ||*/ !diferenciatxt) {
         printf("Error al abrir uno de los archivos para E=%.1f\n", E);
         // Cierra los que sí se abrieron
         if (angulostxt) fclose(angulostxt);
         if (posicionestxt) fclose(posicionestxt);
-        if (fasetheta) fclose(fasetheta);
+        /*if (fasetheta) fclose(fasetheta);
         if (fasephi) fclose(fasephi);
-        if (momentostxt) fclose(momentostxt);
+        if (momentostxt) fclose(momentostxt);*/
         continue;
         }
         
@@ -210,9 +214,9 @@ int main(void)
         printf("El argumento es negativo, no es físicamente posible");
         fclose(angulostxt);
         fclose(posicionestxt);
-        fclose(fasetheta);
+        /*fclose(fasetheta);
         fclose(fasephi);
-        fclose(momentostxt);
+        fclose(momentostxt);*/
         fclose(diferenciatxt);
         continue;
         }
@@ -223,9 +227,9 @@ int main(void)
         printf("El argumento es negativo, no es físicamente posible");
         fclose(angulostxt);
         fclose(posicionestxt);
-        fclose(fasetheta);
+        /*fclose(fasetheta);
         fclose(fasephi);
-        fclose(momentostxt);
+        fclose(momentostxt);*/
         fclose(diferenciatxt);
         continue;
         }
@@ -312,7 +316,7 @@ int main(void)
             */
 
             fprintf(angulostxt, "%lf %lf\n", y[0], y[1]);
-            fprintf(momentostxt, "%lf %lf\n", y[2], y[3]);
+            //fprintf(momentostxt, "%lf %lf\n", y[2], y[3]);
 
             /*
             fprintf(posicionestxt, "%lf %lf %lf %lf\n", pos[0], pos[1], pos[2], pos[3]);
@@ -320,17 +324,20 @@ int main(void)
             fprintf(fasetheta, "%lf %lf\n", y[0], vel[0]);
             fprintf(fasephi, "%lf %lf\n", y[1], vel[1]);
             */
-
-            diferenciatotal += sqrt(pow(diff[0],2) + pow(diff[1],2) +pow(diff[2],2) +pow(diff[3],2));
-            lyapunov += diferenciatotal/diferenciainicial;
+            diff[0] = y[0]-l[0];
+            diff[1] = y[1]-l[1];
+            diff[2] = y[2]-l[2];
+            diff[3] = y[3]-l[3];
+            diferenciatotal = sqrt(pow(diff[0],2) + pow(diff[1],2) +pow(diff[2],2) +pow(diff[3],2));
+            lyapunov += log(diferenciatotal/diferenciainicial);
 
             t=t+h;
         }
         fclose(angulostxt);
         fclose(posicionestxt);
-        fclose(fasetheta);
+        /*fclose(fasetheta);
         fclose(fasephi);
-        fclose(momentostxt);
+        fclose(momentostxt);*/
 
         
         fflush(stdout);
