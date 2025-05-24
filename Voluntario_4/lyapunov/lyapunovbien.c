@@ -14,8 +14,8 @@ Este es un programa que hace un pendulo doble y exporta los datos de los angulos
 
 #define g 9.81
 #define PI 3.14159265
-#define T_TOTAL 48 //tiempo total. (No recomendable poner más de 30, sino se raya. Poner 30 o bajar el paso.)
-#define h 0.0001 //paso temporal
+#define T_TOTAL 600 //tiempo total. (No recomendable poner más de 30, sino se raya. Poner 30 o bajar el paso.)
+#define h 0.01 //paso temporal
 
 //Los parámetros del pendulo (según el voluntario son =1 para simplifcar el problema)
 
@@ -32,8 +32,8 @@ double thetaini = PI/16;
 double phiini = PI/16;
 
 //Diferencias en las condiciones iniciales para el segundo péndulo.
-double difftheta = 0.001;
-double diffphi = 0.001; 
+double difftheta = 0.0;
+double diffphi = 0.0001; 
 
 //Creo el vector que tendrá las coordenadas: [theta, phi, momento de theta, momento de phi]
 
@@ -163,10 +163,13 @@ int main(void)
     //El vector pos[4] indica las posiciones en el eje X,Y de la particula 1 y la particula 2. siendo [x1, y1, x2, y2].
     double pos[4];
     double posl[4];
-    double diffv[2];
+    double diffv[4];
 
     //El vector vel[2] indica las velocidades de los ángulos [theta', phi']
     double vel[2];
+
+    //El valor auxiliar de diferencia total para los angulos:
+    double diferenciatotal = 0.0;
 
     int numpasos = T_TOTAL/h;
 
@@ -176,7 +179,7 @@ int main(void)
 
     for (int e = 0; e < num_energias; ++e) {
         double E = energias[e];
-        char fname_angulos[64], fname_momentos[64], fname_hamiltoniano[64], fname_posiciones[64], fname_diffangulos[64], fname_posiciones2[64];
+        char fname_angulos[64], fname_lyapunov[64], fname_momentos[64], fname_hamiltoniano[64], fname_posiciones[64], fname_diffangulos[64], fname_posiciones2[64];
 
         snprintf(fname_angulos, sizeof(fname_angulos), "angulos_%.1f.txt", E);
         snprintf(fname_momentos, sizeof(fname_momentos), "momentos_%.1f.txt", E);
@@ -184,6 +187,7 @@ int main(void)
         snprintf(fname_posiciones, sizeof(fname_posiciones), "posiciones_%.1f.txt", E);
         snprintf(fname_diffangulos, sizeof(fname_diffangulos), "diferenciaangulos_%.1f.txt", E);
         snprintf(fname_posiciones2, sizeof(fname_posiciones2), "posiciones2_%.1f.txt", E);
+        snprintf(fname_lyapunov, sizeof(fname_lyapunov), "lyapunov_%.1f.txt", E);
 
 
 
@@ -194,6 +198,10 @@ int main(void)
         FILE *diffangulos = fopen(fname_diffangulos, "w");
         FILE *posiciones2txt = fopen(fname_posiciones2, "w");
 
+        FILE *lyapunovtxt = fopen(fname_lyapunov, "w");
+
+
+
 
         // Condiciones iniciales
         y[0]=thetaini; // Ángulo theta
@@ -202,10 +210,11 @@ int main(void)
         l[0]=thetaini - difftheta;
         l[1]=phiini - diffphi;
 
-        //Calculo la diferencia y la pongo en el archivo.
-        diffv[0] = y[0]-l[0];
-        diffv[1] = y[1]-l[1];
-        fprintf(diffangulos, "%lf %lf\n", diffv[0], diffv[1]);
+        
+
+        //Asignamos el coeficiente de lyapunov para cada energía y lo guardamos en cada fichero.
+
+        double lyapunov = 0.0;
 
 
         double arg = E - 2*g*(1-cos(y[0])) - g*(1-cos(y[1]));
@@ -228,6 +237,32 @@ int main(void)
         l[3]=l[2]*0.5*cos(l[0]-l[1]);
 
 
+        //Calculo la diferencia y la pongo en el archivo.
+        diffv[0] = fabs(y[0]-l[0]);
+        diffv[1] = fabs(y[1]-l[1]);
+        
+        double ypunto[2]; // velocidad en [thetapunto, phipunto];
+        double lpunto[2];
+
+        ypunto[0] = 1/(2-cos(y[0]-y[1])*cos(y[0]-y[1]))*(y[2]-  y[3]*cos(y[0]-y[1]));
+        ypunto[1] = 1/(2-cos(y[0]-y[1])*cos(y[0]-y[1]))*(y[3]*2-y[2]*cos(y[0]-y[1]));
+
+        lpunto[0] = 1/(2-cos(l[0]-l[1])*cos(l[0]-l[1]))*(l[2]-  l[3]*cos(l[0]-l[1]));
+        lpunto[1] = 1/(2-cos(l[0]-l[1])*cos(l[0]-l[1]))*(l[3]*2-l[2]*cos(l[0]-l[1]));
+
+        diffv[2] = fabs(ypunto[0]-lpunto[0]);
+        diffv[3] = fabs(ypunto[1]-lpunto[1]);
+
+
+
+        //Para lyapunov necesitamos delta(t)=diferenciatotal y delta(0) = diferenciainicial. Luego sacaremos el lambda.
+
+        double diferenciainicial = sqrt(diffv[0]*diffv[0]+diffv[1]*diffv[1]+diffv[2]*diffv[2]+diffv[3]*diffv[3]);
+        diferenciatotal = diferenciainicial;
+
+        fprintf(diffangulos, "%lf\n", diferenciatotal);
+
+
         for(int i=0; i<numpasos; i++) {
 
             //Hacemos el algoritmo de rungekutta y la energía.
@@ -235,7 +270,7 @@ int main(void)
             rungekutta (l);
 
             double Hamil = 0.0;
-            Hamil = hamiltoniano(y) + hamiltoniano(l);
+            Hamil = hamiltoniano(y);
             
             fprintf(angulostxt, "%lf %lf\n", y[0], y[1]);
             fprintf(momentostxt, "%lf %lf\n", y[2], y[3]);
@@ -243,9 +278,27 @@ int main(void)
 
             //Calculo la diferencia de ángulos y lo printeo
 
-            diffv[0] = y[0]-l[0];
-            diffv[1] = y[1]-l[1];
-            fprintf(diffangulos, "%lf %lf\n", diffv[0], diffv[1]);
+            diffv[0] = fabs(y[0]-l[0]);
+            diffv[1] = fabs(y[1]-l[1]);
+            
+            ypunto[0] = 1/(2-cos(y[0]-y[1])*cos(y[0]-y[1]))*(y[2]-  y[3]*cos(y[0]-y[1]));
+            ypunto[1] = 1/(2-cos(y[0]-y[1])*cos(y[0]-y[1]))*(y[3]*2-y[2]*cos(y[0]-y[1]));
+
+            lpunto[0] = 1/(2-cos(l[0]-l[1])*cos(l[0]-l[1]))*(l[2]-  l[3]*cos(l[0]-l[1]));
+            lpunto[1] = 1/(2-cos(l[0]-l[1])*cos(l[0]-l[1]))*(l[3]*2-l[2]*cos(l[0]-l[1]));
+
+            diffv[2] = fabs(ypunto[0]-lpunto[0]);
+            diffv[3] = fabs(ypunto[1]-lpunto[1]);
+            
+            
+            
+            diferenciatotal=sqrt(diffv[0]*diffv[0]+diffv[1]*diffv[1]+diffv[2]*diffv[2]+diffv[3]*diffv[3]);
+
+            lyapunov+= log(diferenciatotal/diferenciainicial)/T_TOTAL;
+
+            fprintf(lyapunovtxt, "%lf\n", lyapunov);
+
+            fprintf(diffangulos, "%lf\n", diferenciatotal);
 
             
 
