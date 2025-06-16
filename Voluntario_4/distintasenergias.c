@@ -14,7 +14,7 @@ Este es un programa que hace un pendulo doble y exporta los datos de los angulos
 
 #define g 9.81
 #define PI 3.14159265
-#define T_TOTAL 48 //tiempo total. (No recomendable poner más de 30, sino se raya. Poner 30 o bajar el paso.)
+#define T_TOTAL 30 //tiempo total. (No recomendable poner más de 30, sino se raya. Poner 30 o bajar el paso.)
 #define h 0.0001 //paso temporal
 
 //Los parámetros del pendulo (según el voluntario son =1 para simplifcar el problema)
@@ -28,8 +28,8 @@ double E = 0.0;
 
 // ##########   DEFINE LAS CONDICIONES INICIALES PARA CADA ENERGÍA: ###############
 
-double thetaini = PI/16;
-double phiini = PI/16;
+double thetaini = 0.3;
+double phiini = 0.1;
 
 //Creo el vector que tendrá las coordenadas: [theta, phi, momento de theta, momento de phi]
 

@@ -14,21 +14,21 @@ Este es el segundo intento para el pendulo doble. Contiene lo básico.
 
 #define g 9.81
 #define PI 3.14159265
-#define h 0.01         //paso de tiempo
-#define T_Total 60      //tiempo total de simulacion
+#define h 0.001         //paso de tiempo
+#define T_Total 100      //tiempo total de simulacion
 
-#define Tmax 600
-#define incremento 10
+#define Tmax 1000
+#define incremento 100 
 
 //Condiciones iniciales:
 
-double thetaini = 0.1;
-double phiini = 0.2;
+double thetaini = 0.3;
+double phiini = 0.3;
 
 //Perturbaciones de Lyapunov:
 
-double difftheta = 0.01;
-double diffphi = 0.01;
+double difftheta = 0.05;
+double diffphi = 0.00;
 
 
 //El vector que usaré para guardar las coordenadas del péndulo será [theta, phi, momento theta, momento phi], con theta el primer ángulo.
@@ -108,10 +108,10 @@ void rungekutta(double a[4])
 
     //Calculo k3:
 
-    k[2][0] = h*dtheta  (a[0]+k[1][0]*0.5, a[1]+k[1][1]*0.5, a[2]+k[1][2]*0.5, a[3]+k[2][3]*0.5);
-    k[2][1] = h*dphi  (a[0]+k[1][0]*0.5, a[1]+k[1][1]*0.5, a[2]+k[1][2]*0.5, a[3]+k[2][3]*0.5);
-    k[2][2] = h*dmtheta  (a[0]+k[1][0]*0.5, a[1]+k[1][1]*0.5, a[2]+k[1][2]*0.5, a[3]+k[2][3]*0.5);
-    k[2][3] = h*dmphi  (a[0]+k[1][0]*0.5, a[1]+k[1][1]*0.5, a[2]+k[1][2]*0.5, a[3]+k[2][3]*0.5);
+    k[2][0] = h*dtheta  (a[0]+k[1][0]*0.5, a[1]+k[1][1]*0.5, a[2]+k[1][2]*0.5, a[3]+k[1][3]*0.5);
+    k[2][1] = h*dphi  (a[0]+k[1][0]*0.5, a[1]+k[1][1]*0.5, a[2]+k[1][2]*0.5, a[3]+k[1][3]*0.5);
+    k[2][2] = h*dmtheta  (a[0]+k[1][0]*0.5, a[1]+k[1][1]*0.5, a[2]+k[1][2]*0.5, a[3]+k[1][3]*0.5);
+    k[2][3] = h*dmphi  (a[0]+k[1][0]*0.5, a[1]+k[1][1]*0.5, a[2]+k[1][2]*0.5, a[3]+k[1][3]*0.5);
 
     //Calculo k4:
 
@@ -154,7 +154,10 @@ int main(void)
 
         for (int tiempo = T_Total; tiempo< Tmax; tiempo = tiempo + incremento)
         { 
-        
+        double Lyapunov = 0.0;
+        double diferencia_inicial = 0.0;
+        double diferencia_total = 0.0;
+
 
         //Creo los ficheros para cada energía.
         
@@ -242,14 +245,18 @@ int main(void)
         
         diff[0] = y[0]-l[0];
         diff[1] = y[1]-l[1];
-        diff[2] = y[2]-l[2];
-        diff[3] = y[3]-l[3];
 
-        double diferenciainicial = sqrt(pow(diff[0],2) + pow(diff[1],2) +pow(diff[2],2) +pow(diff[3],2));
-        double diferenciatotal = diferenciainicial;
-        double lyapunov = 0.0;
+        vel[0] =dtheta(y[0], y[1], y[2], y[3]);
+        vel[1] =dphi(y[0], y[1], y[2], y[3]);
 
-        fprintf(diferenciatxt, "%lf\n", diferenciainicial);
+        vell[0] =dtheta(l[0], l[1], l[2], l[3]);
+        vell[1] =dphi(l[0], l[1], l[2], l[3]);
+
+        diff[2] = vel[0]-vell[0];
+        diff[3] = vel[1]-vell[1];
+        
+        diferencia_inicial = sqrt(pow(y[0]-l[0], 2)+ pow(y[1]-l[1], 2) + pow(vel[0]-vell[0], 2) + pow(vel[1]-vell[1], 2));
+        diferencia_total = diferencia_inicial;        
 
         //Voy a poner al péndulo en una caja 3x3 para que nunca choque con ella.
 
@@ -257,14 +264,6 @@ int main(void)
         pos[1]= 3 - cos(y[0]);
         pos[2]= pos[0] + sin(y[1]);
         pos[3]= pos[1] - cos(y[1]);
-
-        
-
-        //Calculo las velocidades iniciales.
-
-        vel[0] = 1/(2-pow(cos(y[0]-y[1]),2))*(y[2]-y[3]*cos(y[0]-y[1]));
-        vel[1] = 1/(2-pow(cos(y[0]-y[1]),2))*(2*y[3]-y[2]*cos(y[0]-y[1]));
-        
 
         /* Y LO MISMO PARA EL OTRO PENDULO
         posl[0]= 3 + sin(l[0]);
@@ -275,8 +274,6 @@ int main(void)
         vell[1] = 1/(2-pow(cos(l[0]-l[1]),2))*(2*l[3]-l[2]*cos(l[0]-l[1]));
         */
         
-       
-
         //Ponemos las condiciones iniciales en cada fichero:
 
         fprintf(angulostxt, "%lf %lf\n", y[0], y[1]);
@@ -289,63 +286,44 @@ int main(void)
 
         //Condiciones iniciales listas, vamos al bucle del programa.
         double t=0.0;
+        fprintf(diferenciatxt, "%lf\n", diferencia_inicial);
+
         while(t<T_Total)
         {
             rungekutta(y);
             rungekutta(l);
 
-    
-
-            /*vel[0] = 1/(2-pow(cos(y[0]-y[1]),2))*(y[2]-y[3]*cos(y[0]-y[1]));
-            vel[1] = 1/(2-pow(cos(y[0]-y[1]),2))*(2*y[3]-y[2]*cos(y[0]-y[1]));
-
-            pos[0]= 3 + sin(y[0]);
-            pos[1]= 3 - cos(y[0]);
-            pos[2]= pos[0] + sin(y[1]);
-            pos[3]= pos[1] - cos(y[1]);
-            */
-
-
-            /* Y lo mismo para el otro pendulo
-            posl[0]= 3 + sin(l[0]);
-            posl[1]= 3 - cos(l[0]);
-            posl[2]= posl[0] + sin(l[1]);
-            posl[3]= posl[1] - cos(l[1]);
-            vell[0] = 1/(2-pow(cos(l[0]-l[1]),2))*(l[2]-l[3]*cos(l[0]-l[1]));
-            vell[1] = 1/(2-pow(cos(l[0]-l[1]),2))*(2*l[3]-l[2]*cos(l[0]-l[1]));
-            */
-
             fprintf(angulostxt, "%lf %lf\n", y[0], y[1]);
-            //fprintf(momentostxt, "%lf %lf\n", y[2], y[3]);
 
-            /*
-            fprintf(posicionestxt, "%lf %lf %lf %lf\n", pos[0], pos[1], pos[2], pos[3]);
-            
-            fprintf(fasetheta, "%lf %lf\n", y[0], vel[0]);
-            fprintf(fasephi, "%lf %lf\n", y[1], vel[1]);
-            */
             diff[0] = y[0]-l[0];
             diff[1] = y[1]-l[1];
-            diff[2] = y[2]-l[2];
-            diff[3] = y[3]-l[3];
-            diferenciatotal = sqrt(pow(diff[0],2) + pow(diff[1],2) +pow(diff[2],2) +pow(diff[3],2));
-            lyapunov += log(diferenciatotal/diferenciainicial);
+
+            
+            vel[0] =dtheta(y[0], y[1], y[2], y[3]);
+            vel[1] =dphi(y[0], y[1], y[2], y[3]);
+
+            vell[0] =dtheta(l[0], l[1], l[2], l[3]);
+            vell[1] =dphi(l[0], l[1], l[2], l[3]);
+
+            diff[2] = vel[0]-vell[0];
+            diff[3] = vel[1]-vell[1];
+
+            diferencia_total += sqrt(pow(y[0]-l[0], 2)+ pow(y[1]-l[1], 2) + pow(vel[0]-vell[0], 2) + pow(vel[1]-vell[1], 2));
+            Lyapunov += log(diferencia_total/diferencia_inicial);
 
             t=t+h;
         }
-        fclose(angulostxt);
-        fclose(posicionestxt);
-        /*fclose(fasetheta);
-        fclose(fasephi);
-        fclose(momentostxt);*/
-
         
         fflush(stdout);
         
-        lyapunov = lyapunov/tiempo;
-        fprintf(lyapunovtxt,"%lf\n", lyapunov);
+        Lyapunov = Lyapunov/(double)tiempo;
+        fprintf(lyapunovtxt,"%lf %lf\n", Lyapunov, (double) tiempo);
+        
+        fclose(angulostxt);
+        fclose(posicionestxt);
 
     } //termina el bucle del tiempo
+    fclose(lyapunovtxt);
 
     printf("He terminado una energía\n");
     } //termina el bucle de las energías
