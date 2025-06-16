@@ -13,7 +13,7 @@
 #define incremento 10   //Incremento de tiempo
 #define Tmaximo  200  //Tiempo máximo para lyapunov.
 
-#define E 150.0 //Energía total de cada péndulo.
+#define E 10.0 //Energía total de cada péndulo.
 
 //Condiciones iniciales:
 

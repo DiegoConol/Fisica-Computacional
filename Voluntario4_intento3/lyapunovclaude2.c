@@ -1,6 +1,6 @@
 /*
 
-Este es el tercer intento para el pendulo doble. Calculamos lyapunov
+Este es el tercer intento para el pendulo doble. Calculamos lyapunov - CORREGIDO
 
 */
 
@@ -22,13 +22,13 @@ Este es el tercer intento para el pendulo doble. Calculamos lyapunov
 
 //Condiciones iniciales:
 
-double thetaini = PI/16.0;
-double phiini = PI/16.0;
+double thetaini = 0.1;
+double phiini = 0.3;
 
 //Diferencias en los ángulos:
 
 double thetadiff = 0.0;
-double phidiff = 0.0005;
+double phidiff = 0.05;
 
 
 //El vector que usaré para guardar las coordenadas del péndulo será [theta, phi, momento theta, momento phi], con theta el primer ángulo.
@@ -133,12 +133,8 @@ int main(void)
 FILE* lyapunovtxt = fopen("lyapunov.txt", "w");
 
 
-for (int tiempo = T_Total; tiempo<Tmaximo; tiempo = tiempo+incremento)
+for (int tiempo = T_Total; tiempo<=Tmaximo; tiempo = tiempo+incremento)
 {
-
-double Lyapunov = 0.0;
-double diferencia_inicial = 0.0;
-double diferencia_total = 0.0;
 
 //Condiciones iniciales.
 
@@ -157,7 +153,7 @@ y[3] = sqrt(arg1)*cos(y[0]-y[1]);
 l[2] = 2*sqrt(arg2);
 l[3] = sqrt(arg2)*cos(l[0]-l[1]);
 
-//Calculo las velocidades 
+//Calculo las velocidades iniciales
 
 vel[0] =dtheta(y[0], y[1], y[2], y[3]);
 vel[1] =dphi(y[0], y[1], y[2], y[3]);
@@ -165,8 +161,8 @@ vel[1] =dphi(y[0], y[1], y[2], y[3]);
 vell[0] =dtheta(l[0], l[1], l[2], l[3]);
 vell[1] =dphi(l[0], l[1], l[2], l[3]);
 
-diferencia_inicial = sqrt(pow(y[0]-l[0], 2)+ pow(y[1]-l[1], 2) + pow(vel[0]-vell[0], 2) + pow(vel[1]-vell[1], 2));
-diferencia_total = diferencia_inicial;
+double diferencia_inicial = sqrt(pow(y[0]-l[0], 2)+ pow(y[1]-l[1], 2) + pow(vel[0]-vell[0], 2) + pow(vel[1]-vell[1], 2));
+
 double t=0.0;
 while(t<tiempo)
 {
@@ -181,28 +177,27 @@ while(t<tiempo)
     vell[0] =dtheta(l[0], l[1], l[2], l[3]);
     vell[1] =dphi(l[0], l[1], l[2], l[3]);
 
-    //Actualizo lyapunov y la diferencia total
-
-    diferencia_total += sqrt(pow(y[0]-l[0], 2)+ pow(y[1]-l[1], 2) + pow(vel[0]-vell[0], 2) + pow(vel[1]-vell[1], 2));
-    Lyapunov += log(diferencia_total/diferencia_inicial);
-
     t=t+h;
 }
 
-Lyapunov = Lyapunov / (double) tiempo;
+// Calculo la diferencia final
+double diferencia_final = sqrt(pow(y[0]-l[0], 2)+ pow(y[1]-l[1], 2) + pow(vel[0]-vell[0], 2) + pow(vel[1]-vell[1], 2));
 
-fprintf(lyapunovtxt, "%lf %lf\n", Lyapunov, tiempo);
-
-printf("He terminado un tiempo\n", "%lf\n", tiempo);
-fflush(stdout);
-
-
+// Calculo el exponente de Lyapunov
+double Lyapunov = 0.0;
+if(diferencia_inicial > 0 && diferencia_final > 0) {
+    Lyapunov = log(diferencia_final/diferencia_inicial) / (double)tiempo;
 }
 
+fprintf(lyapunovtxt, "%d %lf\n", tiempo, Lyapunov);
+
+printf("He terminado tiempo: %d, Lyapunov: %lf\n", tiempo, Lyapunov);
+fflush(stdout);
+
+}
 
 fclose(lyapunovtxt);
 
 return 0;
-
 
 }
