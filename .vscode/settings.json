@@ -5,6 +5,7 @@
         "numbers": "c",
         "stdio.h": "c",
         "random": "c",
-        "cmath": "c"
+        "cmath": "c",
+        "LYA2.C": "cpp"
     }
 }
