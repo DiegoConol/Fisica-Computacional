@@ -15,7 +15,7 @@ Este es un programa que hace un pendulo doble y exporta los datos de los angulos
 
 #define g 9.81
 #define PI 3.14159265
-#define T_TOTAL 10 //tiempo total.
+#define T_TOTAL 100 //tiempo total.
 #define h 0.01 //paso temporal
 
 //Los parámetros del pendulo (según el voluntario son =1 para simplifcar el problema)
@@ -24,12 +24,12 @@ Este es un programa que hace un pendulo doble y exporta los datos de los angulos
 #define m2 1.0 // masa del segundo pendulo
 #define l1 1.0 // longitud del primer pendulo
 #define l2 1.0 // longitud del segundo pendulo
-#define E 50.0 //Energía total del sistema.
+#define E 20.0 //Energía total del sistema.
 
 //CONDICIONES INCIALES
 
-double thetaini = 1.7;  //Ángulo inicial en theta
-double phiini = 0.8;    //Ángulo inicial en phi
+double thetaini = 1.0;  //Ángulo inicial en theta
+double phiini = 1.2;    //Ángulo inicial en phi
 
 
 //Creo el vector que tendrá las coordenadas: [theta, phi, momento de theta, momento de phi]
