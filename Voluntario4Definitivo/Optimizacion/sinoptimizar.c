@@ -17,7 +17,7 @@ Este es un programa que hace un pendulo doble y exporta los datos de los angulos
 #define g 9.81
 #define PI 3.14159265
 #define T_TOTAL 100 //tiempo total.
-#define h 0.001 //paso temporal
+#define h 0.01 //paso temporal
 
 //Los parámetros del pendulo (según el voluntario son =1 para simplifcar el problema)
 
