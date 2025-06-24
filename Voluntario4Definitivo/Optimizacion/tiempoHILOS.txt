@@ -1,7 +1,8 @@
 Tiempo que tarda en ejecutar para T variable, h=0.001
 SOURCE="optimizadoomp.c"; OUT="optimizadoomp"; echo "Compilando con OpenMP y -lm..."; gcc "$SOURCE" -o "$OUT" -fopenmp -lm; for N in 1 2 4 8 12; do echo ""; echo "Ejecutando con $N hilo(s)..."; export OMP_NUM_THREADS=$N; /usr/bin/time -f "Tiempo real: %e segundos" ./"$OUT"; done
+######## 100000  588.576 595.92  557.59  399.18  681.62  733.50
 T       Mi pc,  pc 1,   pc 2,   pc 4 ,  pc 8,   pc 12,  joel1   joel2   joel4   joel8   joel12
 10000   58.635  59.32   55.94   40.26   54.98   57.66   34.87   26.69   21.06   23.85   37.70
 20000   120.451 114.44  105.02  78.66   107.34  111.51  70.18   54.28   41.23   50.51   77.88
 40000   235.814 235.50  222.26  159.73  217.48  225.25  140.92  111.04  85.50   109.04  154.97
-100000  588.576 595.92  557.59  399.18  681.62  733.50
+

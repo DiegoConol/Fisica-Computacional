@@ -2,9 +2,9 @@ Veamos para distintos tiempos totales y distintos pasos
 Comando en linux:
 gcc optimizadoomp.c -o programaOpen -fopenmp -lm && gcc optimizadoomp.c -o programaO1 -fopenmp -O1 -lm && gcc optimizadoomp.c -o programaO2 -fopenmp -O2 -lm && gcc optimizadoomp.c -o programaO3 -fopenmp -O3 -lm && gcc optimizadoomp.c -o programaOfast -fopenmp -Ofast -lm && echo "programaOpen:" && /usr/bin/time -f "Tiempo real: %e segundos" ./programaOpen && echo "programaO1:" && /usr/bin/time -f "Tiempo real: %e segundos" ./programaO1 && echo "programaO2:" && /usr/bin/time -f "Tiempo real: %e segundos" ./programaO2 && echo "programaO3:" && /usr/bin/time -f "Tiempo real: %e segundos" ./programaO3 && echo "programaOfast:" && /usr/bin/time -f "Tiempo real: %e segundos" ./programaOfast
 gcc sinoptimizar.c -o programaOpen -fopenmp -lm && /usr/bin/time -f "Tiempo real: %e segundos" ./programaOpen
-T_total, paso,  Sin,    openmp, o1,     o2,     o3,     ofast   joelsin,    joelopen,   joelo1  joelo2  joelo3  joelofast
-100     0.01    0.48    0.13    0.12    0.11    0.11    0.10    0.03        0.09        0.19    0.19    0.20    0.195453   
-1000    0.01    0.468   0.62    0.42    0.43    0.41    0.44    0.33        1.96        1.90    1.99    1.98    2.00             
-10000   0.01    6.946   5.65    3.75    3.66    3.70    3.65    3.64        20.89       19.47   18.73   19.45   18.80
-100000  0.01    60.677  54.93   36.53   35.86   36.12   35.69   36.47       204.92      193.08  194.59  196.40  194.40
+T_total, Sin,    openmp, o1,     o2,     o3,     ofast,   joelsin,   joelopen,   joelo1, joelo2,  joelo3,  joelofast
+100      0.48    0.13    0.12    0.11    0.11    0.10    0.03        0.09        0.19    0.19    0.20    0.195453   
+1000     0.468   0.62    0.42    0.43    0.41    0.44    0.33        1.96        1.90    1.99    1.98    2.00             
+10000    6.946   5.65    3.75    3.66    3.70    3.65    3.64        20.89       19.47   18.73   19.45   18.80
+100000   60.677  54.93   36.53   35.86   36.12   35.69   36.47       204.92      193.08  194.59  196.40  194.40
                          
