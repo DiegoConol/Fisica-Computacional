@@ -1,0 +1,4 @@
+momentos.txt filter=lfs diff=lfs merge=lfs -text
+angulos.txt filter=lfs diff=lfs merge=lfs -text
+posiciones.txt filter=lfs diff=lfs merge=lfs -text
+hamiltoniano.txt filter=lfs diff=lfs merge=lfs -text
