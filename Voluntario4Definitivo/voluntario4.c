@@ -207,10 +207,10 @@ int main(void)
     FILE *momentostxt = fopen("momentos.txt", "w");
     FILE *hamiltonianotxt = fopen("hamiltoniano.txt", "w");
     FILE *posicionestxt = fopen("posiciones.txt", "w");
-    FILE *pendulotxt = fopen("pendulo.txt", "w");
 
 
-    if (angulostxt == NULL ||  momentostxt == NULL || hamiltonianotxt == NULL || pendulotxt == NULL || posicionestxt == NULL) {
+
+    if (angulostxt == NULL ||  momentostxt == NULL || hamiltonianotxt == NULL || posicionestxt == NULL) {
         printf("Error al abrir el archivo.\n");
         return 1;
     }
@@ -264,12 +264,9 @@ int main(void)
 
     }
     
-
-
     fclose(angulostxt);
     fclose(momentostxt);
     fclose(hamiltonianotxt);
-    fclose(pendulotxt);
 
 
 }
