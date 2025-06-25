@@ -28,3 +28,9 @@ En cada carpeta, debe encontrar un jupyter notebook: Informe_apartadoX_.... una 
 En dicho notebook se encuentran los plots más importantes, así como el análsis de cada apartado. Es el informe hecho en jupyter.
 Además, en el apartado 1y2 se encuentran 3 subcarpetas: Ficheros, Videos y Plots. Las dos últimas contienen vídeos y ploteos de todo el apartado, respectivamente. y la carpeta fichero tiene los ficheros .txt necesarios.
 Esto es importante, ya que para ejecutar la parte de jupiter se necesitan estos ficheros, por lo que se DEBE DE MOVER LOS .TXT DE LA SUBCARPETA A LA CARPETA DEL APARTADO. En los apartados 3, 4 y optimización no es necesario.
+
+Los informes son:
+- Apartado 1 y 2: https://github.com/DiegoConol/Fisica-Computacional/blob/6a81c7b253c754806a50d4520fcc6e6511724833/Voluntario_4_Pendulo-Doble/Apartado_1y2_Poincare/Informe_Apartado1y2_Poincare.ipynb
+- Apartado 3: https://github.com/DiegoConol/Fisica-Computacional/blob/6a81c7b253c754806a50d4520fcc6e6511724833/Voluntario_4_Pendulo-Doble/Apartado_3_Lyapunov/Informe_Apartado3_Lyapunov.ipynb
+- Apartado 4: https://github.com/DiegoConol/Fisica-Computacional/blob/6a81c7b253c754806a50d4520fcc6e6511724833/Voluntario_4_Pendulo-Doble/Apartado_4_Estabilidad/Informe_Apartado4_Estabilidad.ipynb
+- Apartado Optimización: https://github.com/DiegoConol/Fisica-Computacional/blob/6a81c7b253c754806a50d4520fcc6e6511724833/Voluntario_4_Pendulo-Doble/Apartado_Optimizacion/Informe_Optimizacion.ipynb
