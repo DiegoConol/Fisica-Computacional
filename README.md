@@ -10,6 +10,16 @@ En cada carpeta, debe encontrar un jupyter notebook: Informe_apartadoX.ipynb, do
 En dicho notebook se encuentran los plots más importantes, así como el análsis de cada apartado. Es el informe hecho en jupyter.
 Los videos y plots se encuentran de todas maneras en la misma carpeta del apartado, terminados en mp4 y en png respectivamente.
 
+Los informes son:
+- Apartado 1: https://github.com/DiegoConol/Fisica-Computacional/blob/1c87c6bc9168d69ee523440176323bf03eff60a9/Voluntario_1_Lennard-Jonnes/Apartado_1/Informe_apartado1.ipynb
+- Apartado 2: https://github.com/DiegoConol/Fisica-Computacional/blob/1c87c6bc9168d69ee523440176323bf03eff60a9/Voluntario_1_Lennard-Jonnes/Apartado_2/Informe_apartado2.ipynb
+- Apartado 3: https://github.com/DiegoConol/Fisica-Computacional/blob/1c87c6bc9168d69ee523440176323bf03eff60a9/Voluntario_1_Lennard-Jonnes/Apartado_3/Informe_apartado3.ipynb
+- Apartado 4: https://github.com/DiegoConol/Fisica-Computacional/blob/1c87c6bc9168d69ee523440176323bf03eff60a9/Voluntario_1_Lennard-Jonnes/Apartado_4/Informe_apartado4.ipynb
+- Apartado 5: https://github.com/DiegoConol/Fisica-Computacional/blob/1c87c6bc9168d69ee523440176323bf03eff60a9/Voluntario_1_Lennard-Jonnes/Apartado_5/Informe_apartado5.ipynb
+- Apartado 6: https://github.com/DiegoConol/Fisica-Computacional/blob/1c87c6bc9168d69ee523440176323bf03eff60a9/Voluntario_1_Lennard-Jonnes/Apartado_6/Informe_apartado6.ipynb
+- Apartado 7: https://github.com/DiegoConol/Fisica-Computacional/blob/1c87c6bc9168d69ee523440176323bf03eff60a9/Voluntario_1_Lennard-Jonnes/Apartado_7/Informe_apartado7.ipynb
+- Apartado Optimización: https://github.com/DiegoConol/Fisica-Computacional/blob/1c87c6bc9168d69ee523440176323bf03eff60a9/Voluntario_1_Lennard-Jonnes/Apartado_Optimizacion/Informe_optimizacion.ipynb
+
 
 
 El segundo voluntario es el Péndulo Doble, alojado en Voluntario_4_Pendulo-Doble: https://github.com/DiegoConol/Fisica-Computacional/tree/main/Voluntario_4_Pendulo-Doble
