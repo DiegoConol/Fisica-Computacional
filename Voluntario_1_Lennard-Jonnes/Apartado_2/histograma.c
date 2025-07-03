@@ -35,8 +35,8 @@ Copio lo necesario de Voluntario1.c para que funcione.
 
 #define a 20 //Valor mínimo del histograma
 #define b 50 //Valor máximo del histograma
-#define NUM_BINS 30
-#define V_MAX 20.0 // Velocidad máxima para el histograma
+#define NUM_BINS 1
+#define V_MAX 200.0 // Velocidad máxima para el histograma
 
 
 int numpasos = (int) (T_TOTAL/h) ; //Número de pasos temporales
@@ -136,6 +136,7 @@ int main (void)
 
     //Calculo la velocidad media para saber la temperatura media: NO SE HACE PARA EL HISTOGRAMA, SINO PARA LA TEMPERATURA MEDIA:
     double sumatotalcuadr=0.0;
+    int total_muestras = (t_max - t_min) * N;
 
     for (int t = t_min; t < t_max; t++) {
         if (t >= numpasos) { // Verificar que t no exceda numpasos
@@ -153,11 +154,12 @@ int main (void)
         v_media[t - t_min] = suma_v / N; // Velocidad media
     }
 
-    //Para sacar la v_media total cojo sumatotal y lo divido entre el número de pasos y N:
-    double v_media_total = sumatotalcuadr /(t_max - t_min);
+    // Calculo la energía cinética media por muestra
+    double K_media = 0.5 * M * sumatotalcuadr / total_muestras;
 
-    //Con esto calculo la temperatura media:
-    double T_media = M * v_media_total/ (2*N*KB);
+    // Temperatura media correcta en 2D: T = 2*K_media/(N_dim*KB)
+    double T_media = K_media / KB; // En 2D, K_media = KB*T_media
+
     printf("La temperatura media es: %lf\n", T_media);
 
 
